@@ -4,6 +4,17 @@ package top.lxsky711.easydb.core.tm;
   @Author: 711lxsky
  */
 
+import top.lxsky711.easydb.common.file.FileSetting;
+import top.lxsky711.easydb.common.log.ErrorMessage;
+import top.lxsky711.easydb.common.log.Log;
+import top.lxsky711.easydb.common.log.WarningMessage;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+
 /**
  * 每个事务都有一个 XID，这个XID唯一标识此事务，且XID从1开始自增，不可重复
  * 事务状态有3种： 0 -> active 正在执行，尚未结束   1 -> committed 事务已经提交   2 -> aborted 事务已经撤销回滚
@@ -21,6 +32,13 @@ package top.lxsky711.easydb.core.tm;
 
 
 public interface TransactionManager {
+
+
+    /**
+     * 注意，这里的事务管理器只是维护事务状态
+     * 真正的数据提交、回滚另外有数据管理器维护
+     */
+
 
     // 开启新事务
     long begin();
@@ -42,4 +60,56 @@ public interface TransactionManager {
 
     // 关闭事务管理器
     void close();
+
+
+
+     static TransactionManagerImpl create(String xidFileName){
+        // 创建XID文件
+        File xidFile = new File(xidFileName + TMSetting.XID_FILE_SUFFIX);
+        try {
+            if(! xidFile.createNewFile()){
+                Log.logWarningMessage(WarningMessage.FILE_CREATE_ERROR);
+                return null;
+            }
+        }catch (IOException e){
+            Log.logException(e);
+        }
+        TransactionManagerImpl newTM = build(xidFile);
+        if(newTM == null){
+            Log.logErrorMessage(ErrorMessage.BAD_FILE_CHANNEL);
+            return null;
+        }
+         // 从零创建 XID 文件时需要写一个空的 XID 文件头，即设置 xidCounter=0，否则后续在校验时会不合法
+         newTM.init();
+        return newTM;
+    }
+
+    private static TransactionManagerImpl build(File xidFile){
+         if(! xidFile.exists()){
+             Log.logWarningMessage(WarningMessage.FILE_NOT_EXIST);
+             return null;
+         }
+        if(! xidFile.canRead() || ! xidFile.canWrite()){
+            Log.logWarningMessage(WarningMessage.FILE_USE_ERROR);
+            return null;
+        }
+        RandomAccessFile raf = null;
+        FileChannel fc = null;
+        try {
+            raf = new RandomAccessFile(xidFile, FileSetting.FILE_MODE_READ_AND_WRITE);
+            fc = raf.getChannel();
+        }
+        catch (FileNotFoundException e) {
+            Log.logException(e);
+        }
+        return new TransactionManagerImpl(raf, fc);
+    }
+
+    static TransactionManagerImpl open(String xidFileName){
+        File xidFile = new File(xidFileName + TMSetting.XID_FILE_SUFFIX);
+        return build(xidFile);
+    }
+
+
+
 }

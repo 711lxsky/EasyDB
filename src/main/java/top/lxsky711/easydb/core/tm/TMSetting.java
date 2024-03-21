@@ -8,6 +8,9 @@ package top.lxsky711.easydb.core.tm;
 
 public class TMSetting {
 
+    // XID文件头(事务数量记录)的偏移量
+    public static final int XID_FILE_HEADER_OFFSET = 0;
+
     // XID头(事务数量记录)长度
     public static final int XID_FILE_HEADER_LENGTH = 8;
 

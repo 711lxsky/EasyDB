@@ -20,4 +20,13 @@ public class Log {
         logger.error(err);
         System.exit(LogSetting.SYSTEM_EXIT_CODE);
     }
+
+    public static void logException(Exception e){
+        logger.error(e + e.getMessage());
+        System.exit(LogSetting.SYSTEM_EXIT_CODE);
+    }
+
+    public static void logWarningMessage(String warning){
+        logger.warn(warning);
+    }
 }
