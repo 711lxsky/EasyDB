@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
 
 /**
  * 每个事务都有一个 XID，这个XID唯一标识此事务，且XID从1开始自增，不可重复
@@ -34,35 +33,59 @@ import java.nio.channels.FileChannel;
 public interface TransactionManager {
 
 
-    /**
-     * 注意，这里的事务管理器只是维护事务状态
-     * 真正的数据提交、回滚另外有数据管理器维护
+    /*
+      注意，这里的事务管理器只是维护事务状态
+      真正的数据提交、回滚另外有数据管理器维护
      */
 
 
-    // 开启新事务
+    /**
+     * @Author: 711lxsky
+     * @Description: 开启新事务
+     */
     long begin();
 
-    // 提交新事务
+    /**
+     * @Author: 711lxsky
+     * @Description: 提交新事务
+     */
     void commit(long xid);
 
-    // 取消事务
+    /**
+     * @Author: 711lxsky
+     * @Description: 取消事务
+     */
     void abort(long xid);
 
-    // 查询某个事务状态是否为活动状态
+    /**
+     * @Author: 711lxsky
+     * @Description: 查询某个事务状态是否为活动状态
+     */
     boolean isActive(long xid);
 
-    // 查询某个事务状态是否为已提交状态
+    /**
+     * @Author: 711lxsky
+     * @Description: 查询某个事务状态是否为已提交状态
+     */
     boolean isCommitted(long xid);
 
-    // 查询某个事务状态是否为已回滚状态
+    /**
+     * @Author: 711lxsky
+     * @Description: 查询某个事务状态是否为已回滚状态
+     */
     boolean isAborted(long xid);
 
-    // 关闭事务管理器
+    /**
+     * @Author: 711lxsky
+     * @Description: 关闭事务管理器
+     */
     void close();
 
 
-
+    /**
+     * @Author: 711lxsky
+     * @Description: 根据某个路径创建一个新的事务管理器
+     */
      static TransactionManagerImpl create(String xidFileName){
         // 创建XID文件
         File xidFile = new File(xidFileName + TMSetting.XID_FILE_SUFFIX);
@@ -74,42 +97,53 @@ public interface TransactionManager {
         }catch (IOException e){
             Log.logException(e);
         }
-        TransactionManagerImpl newTM = build(xidFile);
-        if(newTM == null){
-            Log.logErrorMessage(ErrorMessage.BAD_FILE_CHANNEL);
-            return null;
+        RandomAccessFile newFile = buildFile(xidFile);
+        if (newFile != null) {
+             TransactionManagerImpl newTM = new TransactionManagerImpl(newFile, false);
+             // 从零创建 XID 文件时需要写一个空的 XID 文件头，即设置 xidCounter=0，否则后续在校验时会不合法
+             newTM.init();
+             return newTM;
         }
-         // 从零创建 XID 文件时需要写一个空的 XID 文件头，即设置 xidCounter=0，否则后续在校验时会不合法
-         newTM.init();
-        return newTM;
+        Log.logErrorMessage(ErrorMessage.BAD_XID_FILE);
+        return null;
     }
 
-    private static TransactionManagerImpl build(File xidFile){
-         if(! xidFile.exists()){
-             Log.logWarningMessage(WarningMessage.FILE_NOT_EXIST);
-             return null;
-         }
+
+    /**
+     * @Author: 711lxsky
+     * @Description: 根据某个路径打开一个事务管理器
+     */
+    static TransactionManagerImpl open(String xidFileName){
+        File xidFile = new File(xidFileName + TMSetting.XID_FILE_SUFFIX);
+        RandomAccessFile newFile = buildFile(xidFile);
+        if (newFile != null) {
+            return new TransactionManagerImpl(newFile, true);
+        }
+        Log.logErrorMessage(ErrorMessage.BAD_XID_FILE);
+        return null;
+    }
+
+
+    /**
+     * @Author: 711lxsky
+     * @Description: 获取XID文件需要的 RandomAccessFile
+     */
+    private static RandomAccessFile buildFile(File xidFile){
+        if(! xidFile.exists()){
+            Log.logWarningMessage(WarningMessage.FILE_NOT_EXIST);
+            return null;
+        }
         if(! xidFile.canRead() || ! xidFile.canWrite()){
             Log.logWarningMessage(WarningMessage.FILE_USE_ERROR);
             return null;
         }
         RandomAccessFile raf = null;
-        FileChannel fc = null;
         try {
             raf = new RandomAccessFile(xidFile, FileSetting.FILE_MODE_READ_AND_WRITE);
-            fc = raf.getChannel();
         }
         catch (FileNotFoundException e) {
             Log.logException(e);
         }
-        return new TransactionManagerImpl(raf, fc);
+        return raf;
     }
-
-    static TransactionManagerImpl open(String xidFileName){
-        File xidFile = new File(xidFileName + TMSetting.XID_FILE_SUFFIX);
-        return build(xidFile);
-    }
-
-
-
 }

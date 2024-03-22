@@ -2,7 +2,6 @@ package top.lxsky711.easydb.common.log;
 
 /**
  * @Author: 711lxsky
- * @Date: 2024-03-20
  */
 
 public class LogSetting {

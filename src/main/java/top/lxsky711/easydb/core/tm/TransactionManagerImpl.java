@@ -1,10 +1,10 @@
 package top.lxsky711.easydb.core.tm;
 
 import top.lxsky711.easydb.common.data.ByteParser;
+import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.LogSetting;
-import top.lxsky711.easydb.common.log.WarningMessage;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -35,16 +35,18 @@ public class TransactionManagerImpl implements TransactionManager{
     @SuppressWarnings("FieldMayBeFinal")
     private Lock counterLock;
 
-    public TransactionManagerImpl(RandomAccessFile raf, FileChannel fc) {
+    public TransactionManagerImpl(RandomAccessFile raf, boolean isOpen) {
         this.xidFile = raf;
-        this.xidFileChannel = fc;
+        this.xidFileChannel = raf.getChannel();
         this.counterLock = new ReentrantLock();
-        this.checkXIDCounter();
+        if(isOpen){
+            this.checkXIDCounter();
+        }
     }
 
     public void init(){
         ByteBuffer xidFileHeaderBuf = ByteBuffer.wrap(new byte[TMSetting.XID_FILE_HEADER_LENGTH]);
-        this.writeXIDFile(TMSetting.XID_FILE_HEADER_OFFSET, xidFileHeaderBuf);
+        FileManager.writeByteDataIntoFileChannel(this.xidFileChannel, TMSetting.XID_FILE_HEADER_OFFSET, xidFileHeaderBuf);
     }
 
     /**
@@ -65,10 +67,6 @@ public class TransactionManagerImpl implements TransactionManager{
         }
     }
 
-    /**
-     * @Author: 711lxsky
-     * @Description:
-     */
     @Override
     public void commit(long xid) {
         this.updateXIDStatus(xid, TMSetting.TRANSACTION_COMMITTED);
@@ -105,12 +103,7 @@ public class TransactionManagerImpl implements TransactionManager{
 
     @Override
     public void close() {
-        try {
-            this.xidFileChannel.close();
-            this.xidFile.close();
-        }catch (IOException e){
-            Log.logErrorMessage(e.getMessage() + LogSetting.LOG_MASSAGE_CONNECTOR + ErrorMessage.FILE_CLOSE_ERROR);
-        }
+        FileManager.closeFileAndChannel(this.xidFileChannel, this.xidFile);
     }
 
     /**
@@ -120,52 +113,8 @@ public class TransactionManagerImpl implements TransactionManager{
     private void addOneForXIDCounter(){
         this.transactionCounter ++;
         ByteBuffer counterBuffer = ByteBuffer.wrap(ByteParser.longToBytes(this.transactionCounter));
-        this.writeXIDFile(TMSetting.XID_FILE_HEADER_OFFSET, counterBuffer);
-        this.forceFileChannel(false);
-    }
-
-    /**
-     * @Author: 711lxsky
-     * @Description: 将数据读取操作封装
-     */
-    private void readXIDFile(long pos, ByteBuffer readBuffer){
-        try {
-            this.xidFileChannel.position(pos);
-            this.xidFileChannel.read(readBuffer);
-        }
-        catch (IOException e){
-            Log.logErrorMessage(e.getMessage() + LogSetting.LOG_MASSAGE_CONNECTOR + ErrorMessage.FILE_CHANNEL_ERROR);
-        }
-    }
-
-    /**
-     * @Author: 711lxsky
-     * @Description: 将数据写入操作封装，这里会判断写入数据的大小是否足够，作为警告日志
-     */
-    private void writeXIDFile(long pos, ByteBuffer writeBuffer){
-        try {
-            this.xidFileChannel.position(pos);
-            int writeCapacity = this.xidFileChannel.write(writeBuffer);
-            if(writeCapacity < writeBuffer.capacity()){
-                Log.logWarningMessage(WarningMessage.FILE_CHANNEL_WRITE_NOT_ENOUGH);
-            }
-        }
-        catch (IOException e){
-            Log.logErrorMessage(e.getMessage() + LogSetting.LOG_MASSAGE_CONNECTOR + ErrorMessage.FILE_CHANNEL_ERROR);
-        }
-    }
-
-    /**
-     * @Author: 711lxsky
-     * @Description: 强制FileChannel数据刷新到磁盘，参数是选择是否刷新元数据
-     */
-    private void forceFileChannel(boolean metaDataForce){
-        try {
-            this.xidFileChannel.force(metaDataForce);
-        }
-        catch (IOException e){
-            Log.logWarningMessage(e.getMessage() + LogSetting.LOG_MASSAGE_CONNECTOR + WarningMessage.FILE_CHANNEL_DATA_REFRESH_ERROR);
-        }
+        FileManager.writeByteDataIntoFileChannel(this.xidFileChannel, TMSetting.XID_FILE_HEADER_OFFSET, counterBuffer);
+        FileManager.forceRefreshFileChannel(this.xidFileChannel,false);
     }
 
     /**
@@ -173,21 +122,15 @@ public class TransactionManagerImpl implements TransactionManager{
      * @Description: 检查当前事务计数器以及XID文件是否合法
      */
     private void checkXIDCounter() {
-        long xidFileLength = 0L;
         // 检查文件合法
-        try {
-            xidFileLength = xidFile.length();
-        }
-        catch (IOException e){
-            Log.logErrorMessage(ErrorMessage.BAD_XID_FILE + LogSetting.LOG_MASSAGE_CONNECTOR + e.getMessage());
-        }
+        long xidFileLength = FileManager.getFileLength(this.xidFile);
         if(xidFileLength < TMSetting.XID_FILE_HEADER_LENGTH){
             Log.logErrorMessage(ErrorMessage.BAD_XID_FILE_HEADER);
         }
 
         // 创建一个ByteBuffer用以处理字节数据
         ByteBuffer bf = ByteBuffer.allocate(TMSetting.XID_FILE_HEADER_LENGTH);
-        this.readXIDFile(TMSetting.XID_FILE_HEADER_OFFSET, bf);
+        FileManager.readByteDataIntoFileChannel(this.xidFileChannel, TMSetting.XID_FILE_HEADER_OFFSET, bf);
         this.transactionCounter = ByteParser.parseBytesToLong(bf.array());
         // 这里加上1是因为XID从1开始
         long fileEndPos = this.getXIDStatusPos(this.transactionCounter + 1);
@@ -211,7 +154,7 @@ public class TransactionManagerImpl implements TransactionManager{
     private boolean checkXIDStatus(long xid, byte status){
         long xidOffset = this.getXIDStatusPos(xid);
         ByteBuffer xidStatus = ByteBuffer.wrap(new byte[TMSetting.TRANSACTION_STATUS_SIZE]);
-        this.readXIDFile(xidOffset, xidStatus);
+        FileManager.readByteDataIntoFileChannel(this.xidFileChannel, xidOffset, xidStatus);
         return xidStatus.get(0) == status;
     }
 
@@ -224,8 +167,8 @@ public class TransactionManagerImpl implements TransactionManager{
         long xidOffset = this.getXIDStatusPos(xid);
         byte[] xidStatus = this.getBytesWithXIDStatus(status);
         ByteBuffer newStatus = ByteBuffer.wrap(xidStatus);
-        this.writeXIDFile(xidOffset, newStatus);
-        this.forceFileChannel(false);
+        FileManager.writeByteDataIntoFileChannel(this.xidFileChannel, xidOffset, newStatus);
+        FileManager.forceRefreshFileChannel(this.xidFileChannel, false);
     }
 
     /**
