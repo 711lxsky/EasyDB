@@ -4,15 +4,13 @@ package top.lxsky711.easydb.core.tm;
   @Author: 711lxsky
  */
 
-import top.lxsky711.easydb.common.file.FileSetting;
+import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
-import top.lxsky711.easydb.common.log.WarningMessage;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Objects;
 
 /**
  * 每个事务都有一个 XID，这个XID唯一标识此事务，且XID从1开始自增，不可重复
@@ -86,25 +84,16 @@ public interface TransactionManager {
      * @Author: 711lxsky
      * @Description: 根据某个路径创建一个新的事务管理器
      */
-     static TransactionManagerImpl create(String xidFileName){
-        // 创建XID文件
-        File xidFile = new File(xidFileName + TMSetting.XID_FILE_SUFFIX);
-        try {
-            if(! xidFile.createNewFile()){
-                Log.logWarningMessage(WarningMessage.FILE_CREATE_ERROR);
-                return null;
-            }
-        }catch (IOException e){
-            Log.logException(e);
-        }
-        RandomAccessFile newFile = buildFile(xidFile);
-        if (newFile != null) {
-             TransactionManagerImpl newTM = new TransactionManagerImpl(newFile, false);
-             // 从零创建 XID 文件时需要写一个空的 XID 文件头，即设置 xidCounter=0，否则后续在校验时会不合法
+     static TransactionManagerImpl create(String xidFileFullName){
+        // 创建基础文件
+        File newFile = FileManager.createFile(xidFileFullName + TMSetting.XID_FILE_SUFFIX);
+        TransactionManagerImpl newTM = buildTMWithFile(newFile, false);
+        // 从零创建 XID 文件时需要写一个空的 XID 文件头，即设置 xidCounter=0，否则后续在校验时会不合法
+         if(Objects.nonNull(newTM)){
              newTM.init();
              return newTM;
-        }
-        Log.logErrorMessage(ErrorMessage.BAD_XID_FILE);
+         }
+         Log.logErrorMessage(ErrorMessage.BAD_TM);
         return null;
     }
 
@@ -113,37 +102,23 @@ public interface TransactionManager {
      * @Author: 711lxsky
      * @Description: 根据某个路径打开一个事务管理器
      */
-    static TransactionManagerImpl open(String xidFileName){
-        File xidFile = new File(xidFileName + TMSetting.XID_FILE_SUFFIX);
-        RandomAccessFile newFile = buildFile(xidFile);
-        if (newFile != null) {
-            return new TransactionManagerImpl(newFile, true);
+    static TransactionManagerImpl open(String xidFileFullName){
+        // 创建基础文件
+        File newFile = FileManager.openFile(xidFileFullName + TMSetting.XID_FILE_SUFFIX);
+        return buildTMWithFile(newFile, true);
+    }
+
+    static TransactionManagerImpl buildTMWithFile(File file, boolean isOpen){
+        if(Objects.nonNull(file)){
+            RandomAccessFile xidFile = FileManager.buildRAFile(file);
+            if (xidFile != null) {
+                return new TransactionManagerImpl(xidFile, isOpen);
+            }
+            Log.logErrorMessage(ErrorMessage.BAD_XID_FILE);
+            return null;
         }
-        Log.logErrorMessage(ErrorMessage.BAD_XID_FILE);
+        Log.logErrorMessage(ErrorMessage.BAD_FILE);
         return null;
     }
 
-
-    /**
-     * @Author: 711lxsky
-     * @Description: 获取XID文件需要的 RandomAccessFile
-     */
-    private static RandomAccessFile buildFile(File xidFile){
-        if(! xidFile.exists()){
-            Log.logWarningMessage(WarningMessage.FILE_NOT_EXIST);
-            return null;
-        }
-        if(! xidFile.canRead() || ! xidFile.canWrite()){
-            Log.logWarningMessage(WarningMessage.FILE_USE_ERROR);
-            return null;
-        }
-        RandomAccessFile raf = null;
-        try {
-            raf = new RandomAccessFile(xidFile, FileSetting.FILE_MODE_READ_AND_WRITE);
-        }
-        catch (FileNotFoundException e) {
-            Log.logException(e);
-        }
-        return raf;
-    }
 }

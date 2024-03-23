@@ -29,4 +29,7 @@ public class WarningMessage {
 
     public static final String FILE_LENGTH_SET_ERROR
             = "There are some error happened during the file length set!";
+
+    public static final String PAGE_FREE_SPACE_NOT_ENOUGH
+            = "The page's free space is not enough for this data!";
 }

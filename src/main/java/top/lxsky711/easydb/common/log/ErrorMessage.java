@@ -6,6 +6,12 @@ package top.lxsky711.easydb.common.log;
 
 public class ErrorMessage {
 
+    public static final String BAD_FILE
+            = "This file has error!";
+
+    public static final String BAD_RANDOM_ACCESS_FILE
+            = "This RandomAccessFile has error!";
+
     public static final String BAD_XID_FILE
             = "This XID_File has error!";
 
@@ -14,6 +20,9 @@ public class ErrorMessage {
 
     public static final String BAD_XID_FILE_HEADER
             = "The XID_File's header is wrong!";
+
+    public static final String BAD_TM
+            = "The Transaction-Manager is wrong";
 
     public static final String BAD_FILE_CHANNEL
             = "The file-channel is bad!";

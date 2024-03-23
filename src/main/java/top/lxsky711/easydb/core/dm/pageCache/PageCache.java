@@ -1,6 +1,14 @@
 package top.lxsky711.easydb.core.dm.pageCache;
 
+import top.lxsky711.easydb.common.file.FileManager;
+import top.lxsky711.easydb.common.log.ErrorMessage;
+import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.core.dm.page.Page;
+import top.lxsky711.easydb.core.dm.page.PageSetting;
+
+import java.io.File;
+import java.io.RandomAccessFile;
+import java.util.Objects;
 
 /**
  * @Author: 711lxsky
@@ -51,5 +59,29 @@ public interface PageCache {
      * @Description: 关闭页面缓存，这里是基于RandomAccessFile实现，需要关闭资源
      */
     void close();
+
+    static PageCacheImpl create(String pageFileFullName, long memory){
+        File newFile = FileManager.createFile(pageFileFullName + PageSetting.PAGE_FILE_SUFFIX);
+        return buildPageCacheWithFile(newFile, memory);
+
+    }
+
+    static PageCacheImpl open(String pageFileFullName, long memory){
+        File newFile = FileManager.openFile(pageFileFullName + PageSetting.PAGE_FILE_SUFFIX);
+        return buildPageCacheWithFile(newFile, memory);
+    }
+
+    static PageCacheImpl buildPageCacheWithFile(File file, long memory){
+        if(Objects.nonNull(file)){
+            RandomAccessFile pageFile = FileManager.buildRAFile(file);
+            if(Objects.nonNull(pageFile)){
+                return new PageCacheImpl(pageFile, (int)memory/PageSetting.PAGE_SIZE);
+            }
+            Log.logErrorMessage(ErrorMessage.BAD_PAGE_FILE);
+            return null;
+        }
+        Log.logErrorMessage(ErrorMessage.BAD_FILE);
+        return null;
+    }
 
 }

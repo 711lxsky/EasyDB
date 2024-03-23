@@ -123,7 +123,7 @@ public class TransactionManagerImpl implements TransactionManager{
      */
     private void checkXIDCounter() {
         // 检查文件合法
-        long xidFileLength = FileManager.getFileLength(this.xidFile);
+        long xidFileLength = FileManager.getRAFileLength(this.xidFile);
         if(xidFileLength < TMSetting.XID_FILE_HEADER_LENGTH){
             Log.logErrorMessage(ErrorMessage.BAD_XID_FILE_HEADER);
         }

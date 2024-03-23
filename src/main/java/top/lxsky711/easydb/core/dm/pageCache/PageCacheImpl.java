@@ -48,12 +48,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
         if(maxResourceNum < PageSetting.PAGE_CACHE_MIN_SIZE){
             Log.logWarningMessage(WarningMessage.PAGE_CACHE_RESOURCE_TOO_LESS);
         }
-        long pageDataFileLength = 0L;
-        try {
-            pageDataFileLength = raf.length();
-        }catch (IOException e){
-            Log.logErrorMessage(e.getMessage() + LogSetting.LOG_MASSAGE_CONNECTOR + ErrorMessage.BAD_PAGE_FILE);
-        }
+        long pageDataFileLength = FileManager.getRAFileLength(raf);
         this.pageDataFile = raf;
         this.pageFileChannel = raf.getChannel();
         this.pageFileLock = new ReentrantLock();

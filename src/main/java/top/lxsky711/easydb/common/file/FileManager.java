@@ -5,6 +5,8 @@ import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.LogSetting;
 import top.lxsky711.easydb.common.log.WarningMessage;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -69,15 +71,15 @@ public class FileManager {
 
     /**
      * @Author: 711lxsky
-     * @Description: 获取文件长度封装
+     * @Description: 获取RAF文件长度封装
      */
-    public static long getFileLength(RandomAccessFile file){
+    public static long getRAFileLength(RandomAccessFile file){
         long fileLength = -1L;
         try {
             fileLength = file.length();
         }
         catch (IOException e) {
-            Log.logErrorMessage(ErrorMessage.BAD_XID_FILE + LogSetting.LOG_MASSAGE_CONNECTOR + e.getMessage());
+            Log.logErrorMessage(e.getMessage() + LogSetting.LOG_MASSAGE_CONNECTOR + ErrorMessage.BAD_RANDOM_ACCESS_FILE);
         }
         return fileLength;
     }
@@ -112,6 +114,56 @@ public class FileManager {
         catch (IOException e){
             Log.logErrorMessage(e.getMessage() + LogSetting.LOG_MASSAGE_CONNECTOR + ErrorMessage.FILE_CLOSE_ERROR);
         }
+    }
+
+    /**
+     * @Author: 711lxsky
+     * @Description: 打开文件封装
+     */
+    public static File openFile(String fileFullName){
+        File newFile = new File(fileFullName);
+        if(! newFile.exists()){
+            Log.logWarningMessage(WarningMessage.FILE_NOT_EXIST);
+            return null;
+        }
+        return newFile;
+    }
+
+    /**
+     * @Author: 711lxsky
+     * @Description: 基于文件全名创建一个新的文件封装
+     */
+    public static File createFile(String fileFullName){
+        File newFile = new File(fileFullName);
+        try {
+            if(! newFile.createNewFile()){
+                Log.logWarningMessage(WarningMessage.FILE_CREATE_ERROR);
+                return null;
+            }
+        }catch (IOException e){
+            Log.logException(e);
+        }
+        return newFile;
+    }
+
+
+    /**
+     * @Author: 711lxsky
+     * @Description: 基于File创建一个新的RandomAccessFile操作封装
+     */
+    public static RandomAccessFile buildRAFile(File file){
+        if(! file.canRead() || ! file.canWrite()){
+            Log.logWarningMessage(WarningMessage.FILE_USE_ERROR);
+            return null;
+        }
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(file, FileSetting.FILE_MODE_READ_AND_WRITE);
+        }
+        catch (FileNotFoundException e) {
+            Log.logException(e);
+        }
+        return raf;
     }
 
 }

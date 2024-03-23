@@ -34,7 +34,7 @@ public class CacheTest {
             long uid = random.nextInt();
             long h = 0;
             try {
-                h = cache.getCacheByKey(uid);
+                h = cache.getCacheFromDataSourceByKey(uid);
             } catch (Exception e) {
                 Log.logException(e);
             }
