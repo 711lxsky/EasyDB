@@ -32,4 +32,13 @@ public class WarningMessage {
 
     public static final String PAGE_FREE_SPACE_NOT_ENOUGH
             = "The page's free space is not enough for this data!";
+
+    public static final String LOG_FILE_MAYBE_ERROR
+            = "The log-file record maybe has some error for its data";
+
+    public static final String LOG_CHECKSUM_ERROR
+            = "The log's checksum has wrong";
+
+    public static final String FILE_CHANNEL_TRUNCATE_ERROR
+            = "The file-channel's truncate operation has some error!";
 }

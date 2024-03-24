@@ -1,16 +1,13 @@
 package top.lxsky711.easydb.core.dm.pageCache;
 
 import top.lxsky711.easydb.common.file.FileManager;
-import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
-import top.lxsky711.easydb.common.log.LogSetting;
 import top.lxsky711.easydb.common.log.WarningMessage;
 import top.lxsky711.easydb.core.common.AbstractCache;
 import top.lxsky711.easydb.core.dm.page.Page;
 import top.lxsky711.easydb.core.dm.page.PageImpl;
 import top.lxsky711.easydb.core.dm.page.PageSetting;
 
-import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;

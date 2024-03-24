@@ -166,4 +166,20 @@ public class FileManager {
         return raf;
     }
 
+
+    public static void truncateFileChannel(FileChannel fc, long position){
+        try {
+            fc.truncate(position);
+        }catch (IOException e){
+            Log.logWarningMessage(e.getMessage() + LogSetting.LOG_MASSAGE_CONNECTOR + WarningMessage.FILE_CHANNEL_TRUNCATE_ERROR);
+        }
+    }
+
+    public static void seekRandomAccessFile(RandomAccessFile raf, long position){
+        try {
+            raf.seek(position);
+        }catch (IOException e){
+            Log.logWarningMessage(e.getMessage() + LogSetting.LOG_MASSAGE_CONNECTOR + WarningMessage.FILE_USE_ERROR);
+        }
+    }
 }

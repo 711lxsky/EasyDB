@@ -1,9 +1,5 @@
 package top.lxsky711.easydb.core.tm;
 
-/*
-  @Author: 711lxsky
- */
-
 import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
@@ -13,6 +9,7 @@ import java.io.RandomAccessFile;
 import java.util.Objects;
 
 /**
+ * @Author: 711lxsky
  * 每个事务都有一个 XID，这个XID唯一标识此事务，且XID从1开始自增，不可重复
  * 事务状态有3种： 0 -> active 正在执行，尚未结束   1 -> committed 事务已经提交   2 -> aborted 事务已经撤销回滚
  * 另外规定， XID = 0 是一个超级事务，可以在没有申请的事务的情况下执行某些操作。且超级事务状态永远是committed
@@ -87,14 +84,7 @@ public interface TransactionManager {
      static TransactionManagerImpl create(String xidFileFullName){
         // 创建基础文件
         File newFile = FileManager.createFile(xidFileFullName + TMSetting.XID_FILE_SUFFIX);
-        TransactionManagerImpl newTM = buildTMWithFile(newFile, false);
-        // 从零创建 XID 文件时需要写一个空的 XID 文件头，即设置 xidCounter=0，否则后续在校验时会不合法
-         if(Objects.nonNull(newTM)){
-             newTM.init();
-             return newTM;
-         }
-         Log.logErrorMessage(ErrorMessage.BAD_TM);
-        return null;
+        return buildTMWithFile(newFile, false);
     }
 
 
@@ -112,7 +102,14 @@ public interface TransactionManager {
         if(Objects.nonNull(file)){
             RandomAccessFile xidFile = FileManager.buildRAFile(file);
             if (xidFile != null) {
-                return new TransactionManagerImpl(xidFile, isOpen);
+                if(isOpen){
+                    TransactionManagerImpl tm = new TransactionManagerImpl(xidFile);
+                    tm.checkXIDCounter();
+                    return tm;
+                }
+                TransactionManagerImpl tm = new TransactionManagerImpl(xidFile);
+                tm.initCreate();
+                return tm;
             }
             Log.logErrorMessage(ErrorMessage.BAD_XID_FILE);
             return null;

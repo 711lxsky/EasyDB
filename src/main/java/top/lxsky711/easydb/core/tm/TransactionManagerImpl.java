@@ -4,9 +4,7 @@ import top.lxsky711.easydb.common.data.ByteParser;
 import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
-import top.lxsky711.easydb.common.log.LogSetting;
 
-import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -35,18 +33,16 @@ public class TransactionManagerImpl implements TransactionManager{
     @SuppressWarnings("FieldMayBeFinal")
     private Lock counterLock;
 
-    public TransactionManagerImpl(RandomAccessFile raf, boolean isOpen) {
+    public TransactionManagerImpl(RandomAccessFile raf) {
         this.xidFile = raf;
         this.xidFileChannel = raf.getChannel();
         this.counterLock = new ReentrantLock();
-        if(isOpen){
-            this.checkXIDCounter();
-        }
     }
 
-    public void init(){
+    public void initCreate(){
         ByteBuffer xidFileHeaderBuf = ByteBuffer.wrap(new byte[TMSetting.XID_FILE_HEADER_LENGTH]);
         FileManager.writeByteDataIntoFileChannel(this.xidFileChannel, TMSetting.XID_FILE_HEADER_OFFSET, xidFileHeaderBuf);
+        FileManager.forceRefreshFileChannel(this.xidFileChannel, false);
     }
 
     /**
@@ -121,7 +117,7 @@ public class TransactionManagerImpl implements TransactionManager{
      * @Author: 711lxsky
      * @Description: 检查当前事务计数器以及XID文件是否合法
      */
-    private void checkXIDCounter() {
+    protected void checkXIDCounter() {
         // 检查文件合法
         long xidFileLength = FileManager.getRAFileLength(this.xidFile);
         if(xidFileLength < TMSetting.XID_FILE_HEADER_LENGTH){

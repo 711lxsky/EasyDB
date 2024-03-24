@@ -18,6 +18,9 @@ public class ErrorMessage {
     public static final String BAD_PAGE_FILE
             = "This PAGE_File has error!";
 
+    public static final String BAD_LOG_FILE
+            = "The LOG_File has error!";
+
     public static final String BAD_XID_FILE_HEADER
             = "The XID_File's header is wrong!";
 

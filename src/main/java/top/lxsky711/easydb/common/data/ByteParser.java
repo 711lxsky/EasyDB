@@ -18,6 +18,15 @@ public class ByteParser {
         return ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(value).array();
     }
 
+    public static int parseBytesToInt(byte[] bytes){
+        ByteBuffer buffer = ByteBuffer.wrap(bytes, ParseSetting.DATA_START_POS, ParseSetting.INT_SIZE);
+        return buffer.getInt();
+    }
+
+    public static byte[] intToBytes(int value) {
+        return ByteBuffer.allocate(Integer.SIZE / Byte.SIZE).putInt(value).array();
+    }
+
     public static short parseBytesToShort(byte[] bytes){
         ByteBuffer buffer = ByteBuffer.wrap(bytes, ParseSetting.DATA_START_POS, ParseSetting.SHORT_SIZE);
         return buffer.getShort();
