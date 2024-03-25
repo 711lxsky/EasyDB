@@ -41,4 +41,7 @@ public class WarningMessage {
 
     public static final String FILE_CHANNEL_TRUNCATE_ERROR
             = "The file-channel's truncate operation has some error!";
+
+    public static final String LOG_TYPE_ERROR =
+            "The log's type may has error which is unknown, check it for real need!";
 }

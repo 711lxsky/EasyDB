@@ -35,4 +35,78 @@ public class LoggerSetting {
 
     public static final int UNDO = 4;
 
+    // 插入日志
+    public static class InsertLog {
+
+        public byte type;
+
+        public long xid;
+
+        public int pageNumber;
+
+        public short offset;
+
+        public byte[] data;
+    }
+
+    // 更新日志
+    public static class UpdateLog {
+
+        public byte type;
+
+        public long xid;
+
+        public int pageNumber;
+
+        public short offset;
+
+        public byte[] oldData;
+
+        public byte[] newData;
+    }
+
+    public static final byte LOG_TYPE_OFFSET = 0;
+
+    public static final int LOG_TYPE_LENGTH = 1;
+
+    public static final int LOG_XID_OFFSET = LOG_TYPE_OFFSET + LOG_TYPE_LENGTH;
+
+    public static final int LOG_XID_LENGTH = 8;
+
+    public static final int LOG_PAGE_NUMBER_OFFSET = LOG_XID_OFFSET + LOG_XID_LENGTH;
+
+    public static final int LOG_PAGE_NUMBER_LENGTH = 4;
+
+    public static final int LOG_OFFSET_OFFSET = LOG_PAGE_NUMBER_OFFSET + LOG_PAGE_NUMBER_LENGTH;
+
+    public static final int LOG_OFFSET_LENGTH = 2;
+
+    public static final int LOG_DATA_OFFSET = LOG_OFFSET_OFFSET + LOG_OFFSET_LENGTH;
+
+    /* 因为两种日志的结构差别不大，所以 偏移量就设为共用
+
+    public static final int INSET_LOG_TYPE_OFFSET = 0;
+
+    public static int INSET_LOG_XID_OFFSET = INSET_LOG_TYPE_OFFSET + LOG_TYPE_LENGTH;
+
+    public static int INSET_LOG_PAGE_NUMBER_OFFSET = INSET_LOG_XID_OFFSET + LOG_XID_LENGTH;
+
+    public static int INSET_LOG_OFFSET_OFFSET = INSET_LOG_PAGE_NUMBER_OFFSET + LOG_PAGE_NUMBER_LENGTH;
+
+    public static int INSET_LOG_DATA_OFFSET = INSET_LOG_OFFSET_OFFSET + LOG_OFFSET_LENGTH;
+
+
+
+    public static int UPDATE_LOG_TYPE_OFFSET = 0;
+
+    public static int UPDATE_LOG_XID_OFFSET = UPDATE_LOG_TYPE_OFFSET + LOG_TYPE_LENGTH;
+
+    public static int UPDATE_LOG_PAGE_NUMBER_OFFSET = UPDATE_LOG_XID_OFFSET + LOG_XID_LENGTH;
+
+    public static int UPDATE_LOG_OFFSET_OFFSET = UPDATE_LOG_PAGE_NUMBER_OFFSET + LOG_PAGE_NUMBER_LENGTH;
+
+    public static int UPDATE_LOG_DATA_OFFSET = UPDATE_LOG_OFFSET_OFFSET + LOG_OFFSET_LENGTH;
+
+     */
+
 }
