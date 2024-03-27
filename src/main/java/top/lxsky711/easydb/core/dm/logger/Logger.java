@@ -1,11 +1,14 @@
 package top.lxsky711.easydb.core.dm.logger;
 
+import com.google.common.primitives.Bytes;
+import top.lxsky711.easydb.common.data.ByteParser;
 import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -90,5 +93,95 @@ public interface Logger {
         return null;
     }
 
+    static byte getLogType(byte[] log){
+        byte logType =  log[LoggerSetting.LOG_TYPE_OFFSET];
+        if(logType != LoggerSetting.LOG_TYPE_INSERT && logType != LoggerSetting.LOG_TYPE_UPDATE){
+            Log.logErrorMessage(ErrorMessage.LOG_TYPE_ERROR);
+        }
+        return logType;
+    }
+
+    static byte[] getLogXIDBytes(byte[] log){
+        return Arrays.copyOfRange(log, LoggerSetting.LOG_XID_OFFSET, LoggerSetting.LOG_PAGE_NUMBER_OFFSET);
+    }
+
+    static long getLogXID(byte[] log){
+        long logXid =  ByteParser.parseBytesToLong(getLogXIDBytes(log));
+        if(logXid <= 0){
+            Log.logErrorMessage(ErrorMessage.BAD_XID);
+        }
+        return logXid;
+    }
+
+    static byte[] getLogPageNumberBytes(byte[] log){
+        return Arrays.copyOfRange(log, LoggerSetting.LOG_PAGE_NUMBER_OFFSET, LoggerSetting.LOG_OFFSET_OFFSET);
+    }
+
+    static int getLogPageNumber(byte[] log){
+        int logPageNumber = ByteParser.parseBytesToInt(getLogPageNumberBytes(log));
+        if(logPageNumber <= 0){
+            Log.logErrorMessage(ErrorMessage.BAD_PAGE_NUMBER);
+        }
+        return logPageNumber;
+    }
+
+    static byte[] getLogOffsetBytes(byte[] log){
+        return Arrays.copyOfRange(log, LoggerSetting.LOG_OFFSET_OFFSET, LoggerSetting.LOG_DATA_OFFSET);
+    }
+
+    static short getLogOffset(byte[] log){
+        short logOffset = ByteParser.parseBytesToShort(getLogOffsetBytes(log));
+        if(logOffset < 0){
+            Log.logErrorMessage(ErrorMessage.BAD_OFFSET);
+        }
+        return logOffset;
+    }
+
+    static byte[] getLogData(byte[] log){
+        return Arrays.copyOfRange(log, LoggerSetting.LOG_DATA_OFFSET, log.length);
+    }
+
+    static byte[] buildLogBytes(byte logType, long xid, int pageNumber, short offset, byte[] data){
+        byte[] typeBytes = new byte[]{logType};
+        byte[] xidBytes = ByteParser.longToBytes(xid);
+        byte[] pageNumberBytes = ByteParser.intToBytes(pageNumber);
+        byte[] offsetBytes = ByteParser.shortToBytes(offset);
+        return Bytes.concat(typeBytes, xidBytes, pageNumberBytes, offsetBytes, data);
+    }
+
+    static LoggerSetting.InsertLog parseLogBytesToInsertLog(byte[] log){
+        LoggerSetting.InsertLog insertLog = new LoggerSetting.InsertLog();
+        insertLog.type = LoggerSetting.LOG_TYPE_INSERT;
+        insertLog.xid = getLogXID(log);
+        insertLog.pageNumber = getLogPageNumber(log);
+        insertLog.offset = getLogOffset(log);
+        insertLog.data = getLogData(log);
+        return insertLog;
+    }
+
+    static LoggerSetting.UpdateLog parseLogBytesToUpdateLog(byte[] log){
+        LoggerSetting.UpdateLog updateLog = new LoggerSetting.UpdateLog();
+        updateLog.type = LoggerSetting.LOG_TYPE_UPDATE;
+        updateLog.xid = getLogXID(log);
+        updateLog.pageNumber = getLogPageNumber(log);
+        updateLog.offset = getLogOffset(log);
+        byte[] logData = getLogData(log);
+        int dataLength = logData.length;
+        updateLog.oldData = Arrays.copyOfRange(logData, 0, dataLength / 2);
+        updateLog.newData = Arrays.copyOfRange(logData, dataLength / 2, dataLength);
+        return updateLog;
+    }
+
+    static long parsePageNumberAndOffsetToUid(int pageNumber, short offset){
+        return (((long)pageNumber) << Integer.SIZE) | (long)offset ;
+    }
+
+    static int getPageNumberFromUid(long uid){
+        return (int)(uid >> Integer.SIZE);
+    }
+
+    static short getOffsetFromUid(long uid){
+        return (short)(uid & ((1L << Short.SIZE) - 1));
+    }
 
 }

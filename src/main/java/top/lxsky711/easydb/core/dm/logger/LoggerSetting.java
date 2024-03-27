@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.dm.logger;
 
+import top.lxsky711.easydb.common.data.DataSetting;
+
 /**
  * @Author: 711lxsky
  * @Description: 日志配置
@@ -67,19 +69,19 @@ public class LoggerSetting {
 
     public static final byte LOG_TYPE_OFFSET = 0;
 
-    public static final int LOG_TYPE_LENGTH = 1;
+    public static final int LOG_TYPE_LENGTH = DataSetting.BYTE_BYTE_SIZE;
 
     public static final int LOG_XID_OFFSET = LOG_TYPE_OFFSET + LOG_TYPE_LENGTH;
 
-    public static final int LOG_XID_LENGTH = 8;
+    public static final int LOG_XID_LENGTH = DataSetting.LONG_BYTE_SIZE;
 
     public static final int LOG_PAGE_NUMBER_OFFSET = LOG_XID_OFFSET + LOG_XID_LENGTH;
 
-    public static final int LOG_PAGE_NUMBER_LENGTH = 4;
+    public static final int LOG_PAGE_NUMBER_LENGTH = DataSetting.INT_BYTE_SIZE;
 
     public static final int LOG_OFFSET_OFFSET = LOG_PAGE_NUMBER_OFFSET + LOG_PAGE_NUMBER_LENGTH;
 
-    public static final int LOG_OFFSET_LENGTH = 2;
+    public static final int LOG_OFFSET_LENGTH = DataSetting.SHORT_BYTE_SIZE;
 
     public static final int LOG_DATA_OFFSET = LOG_OFFSET_OFFSET + LOG_OFFSET_LENGTH;
 

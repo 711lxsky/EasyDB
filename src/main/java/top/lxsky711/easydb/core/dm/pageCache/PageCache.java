@@ -40,7 +40,7 @@ public interface PageCache {
      * @Author: 711lxsky
      * @Description: 释放一个页面资源引用
      */
-    void releaseOnePageReference(Page page);
+    void releaseOneReference(Page page);
 
     /**
      * @Author: 711lxsky

@@ -76,8 +76,8 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
     }
 
     @Override
-    public void releaseOnePageReference(Page page) {
-        releaseOneReference(page.getPageNumber());
+    public void releaseOneReference(Page page) {
+        super.releaseOneReference(page.getPageNumber());
     }
 
     @Override

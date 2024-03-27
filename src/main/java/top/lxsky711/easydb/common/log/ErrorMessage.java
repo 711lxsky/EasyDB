@@ -9,6 +9,15 @@ public class ErrorMessage {
     public static final String BAD_FILE
             = "This file has error!";
 
+    public static final String BAD_XID
+            = "This XID is wrong!";
+
+    public static final String BAD_PAGE_NUMBER
+            = "This page-number is wrong!";
+
+    public static final String BAD_OFFSET
+            = "This offset is wrong!";
+
     public static final String BAD_RANDOM_ACCESS_FILE
             = "This RandomAccessFile has error!";
 
@@ -38,4 +47,7 @@ public class ErrorMessage {
 
     public static final String CACHE_RESOURCE_NUMBER_ERROR
             = "The cache resource number is wrong, please check it!";
+
+    public static final String LOG_TYPE_ERROR =
+            "The log's type may has error which is unknown, check it for real need!";
 }

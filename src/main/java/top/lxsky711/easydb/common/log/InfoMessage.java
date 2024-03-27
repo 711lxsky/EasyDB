@@ -8,10 +8,35 @@ package top.lxsky711.easydb.common.log;
 public class InfoMessage {
 
     public static final String RECOVER_START =
-            "------------- Restart start it ----------------" +
+            "------------- Recover start it ----------------" +
                     "\n" +
             "-----------------------------------------------";
 
     public static final String PAGE_TRUNCATE =
             "Pages are truncated!";
+
+    public static final String TRANSACTIONS_REDO_START =
+            "--------- Redo transactions start. -----------" +
+                    "\n" +
+            "-----------------------------------------------";
+
+    public static final String TRANSACTIONS_REDO_OVER =
+            "********* Redo transactions over. ************" +
+                    "\n" +
+            "************************************************";
+
+    public static final String TRANSACTIONS_UNDO_START =
+            "--------- Undo transactions start. -----------" +
+                    "\n" +
+            "-----------------------------------------------";
+
+    public static final String TRANSACTIONS_UNDO_OVER =
+            "********* Undo transactions over. ************" +
+                    "\n" +
+            "************************************************";
+
+    public static final String RECOVER_OVER =
+            "********* Recover over. ************" +
+                    "\n" +
+            "************************************************";
 }

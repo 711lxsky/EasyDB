@@ -42,6 +42,9 @@ public class WarningMessage {
     public static final String FILE_CHANNEL_TRUNCATE_ERROR
             = "The file-channel's truncate operation has some error!";
 
-    public static final String LOG_TYPE_ERROR =
-            "The log's type may has error which is unknown, check it for real need!";
+    public static final String DATA_TOO_LARGE
+            = "The data is too large to insert into the page!";
+
+    public static final String CONCURRENCY_HIGH
+            = "The current concurrency is high, so the database is busy!";
 }

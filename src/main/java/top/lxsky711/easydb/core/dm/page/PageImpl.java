@@ -46,8 +46,8 @@ public class PageImpl implements Page{
     }
 
     @Override
-    public void releaseCache() {
-        this.pageCache.releaseOnePageReference(this);
+    public void releaseOneReference() {
+        this.pageCache.releaseOneReference(this);
     }
 
     @Override

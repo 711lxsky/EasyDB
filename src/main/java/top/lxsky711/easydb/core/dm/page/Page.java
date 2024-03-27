@@ -24,7 +24,7 @@ public interface Page {
      * @Author: 711lxsky
      * @Description: 释放页面缓存
      */
-    void releaseCache();
+    void releaseOneReference();
 
     /**
      * @Author: 711lxsky
