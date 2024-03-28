@@ -10,9 +10,14 @@ public class PageSetting {
     // 页面大小 8KB
     public static final int PAGE_SIZE = 1 << 13;
 
+    // 默认页面最小大小
     public static final int PAGE_DEFAULT_MIN_SIZE = 0;
 
+    // 第一页的默认页号
     public static final int PAGE_ONE_DEFAULT_NUMBER = 1;
+
+    // 普通页的默认起始页号
+    public static final int PAGE_X_DEFAULT_START_NUMBER = 2;
 
     // 页面缓存最小数量
     public static final int PAGE_CACHE_MIN_SIZE = 8;

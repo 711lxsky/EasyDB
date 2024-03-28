@@ -24,8 +24,6 @@ import java.util.Objects;
 
 public class DataManagerImpl extends AbstractCache<DataItem> implements DataManager{
 
-    private TransactionManager tm;
-
     private PageCache pageCache;
 
     private Logger logger;
@@ -34,38 +32,57 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
 
     private Page pageOne;
 
-    public DataManagerImpl(TransactionManager tm, PageCache pageCache, Logger logger) {
+    public DataManagerImpl(PageCache pageCache, Logger logger) {
         super(DataSetting.DATA_CACHE_DEFAULT_SIZE);
         this.pageCache = pageCache;
         this.logger = logger;
-        this.tm = tm;
         this.pageIndex = new PageIndex();
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 创建并初始化第一页
+     */
     public void initPageOne(){
         int pageNumber = this.pageCache.buildNewPageWithData(PageOne.init());
         assert pageNumber == PageSetting.PAGE_ONE_DEFAULT_NUMBER;
         this.pageOne = this.pageCache.getPageByPageNumber(pageNumber);
-        this.pageCache.flushPage(this.pageOne);
+        this.flushPageOne();
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 第一页数据刷盘
+     */
     public void flushPageOne(){
         this.pageCache.flushPage(this.pageOne);
     }
 
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 设置第一页VC
+     */
     public void setPageOneVCOpen(){
         PageOne.setVCWithPageOpen(this.pageOne);
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 检查第一页VC
+     */
     public boolean loadAndCheckPageOne(){
         this.pageOne = this.pageCache.getPageByPageNumber(PageSetting.PAGE_ONE_DEFAULT_NUMBER);
         return PageOne.checkVCWithPage(this.pageOne);
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 初始化页面索引
+     */
     public void initPageIndex(){
-        int pageAllNumber = this.pageCache.getPageNumber();
-        for(int i = 2; i <= pageAllNumber; i ++){
+        int pagesNum= this.pageCache.getPagesNumber();
+        for(int i = PageSetting.PAGE_X_DEFAULT_START_NUMBER; i <= pagesNum; i ++){
             Page page = this.pageCache.getPageByPageNumber(i);
             this.pageIndex.addFreeSpaceForPage(page.getPageNumber(), PageX.getFreeSpaceForPage(page));
             page.releaseOneReference();
@@ -86,7 +103,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
     }
 
     @Override
-    public DataItem readData(long uid) {
+    public DataItem readDataItem(long uid) {
         DataItem dataItem = super.getResource(uid);
         if(! dataItem.isValid()){
             dataItem.releaseOneReference();
@@ -97,34 +114,42 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
 
     @Override
     public long insertData(long xid, byte[] data) {
-        byte[] dataRecord = DataItem.buildDataRecord(data);
-        int dataRecordSize = dataRecord.length;
-        if( dataRecordSize > PageSetting.PAGE_X_MAX_FREE_SPACE){
+        // 先包裹成DataRecord格式
+        byte[] newDataRecord = DataItem.buildDataRecord(data);
+        int newDataRecordSize = newDataRecord.length;
+        // 拿到大小
+        if( newDataRecordSize > PageSetting.PAGE_X_MAX_FREE_SPACE){
             Log.logWarningMessage(WarningMessage.DATA_TOO_LARGE);
             return DataItemSetting.ERROR_INSERT_RESULT;
         }
-        PageInfo  properPageInfo = null;
+        PageInfo properPageInfo = null;
+        // 间歇向页面索引申请页面资源，因为可能存在某些空间被其他事务占用或者是空间不够
         for(int i = 0; i < DataItemSetting.INSET_MAX_RETRY_TIME; i++){
-            properPageInfo = this.pageIndex.selectOnePage(dataRecordSize);
+            properPageInfo = this.pageIndex.selectOnePage(newDataRecordSize);
             if(Objects.nonNull(properPageInfo)){
                 break;
             }
             else {
-                // 因为当前没有找到合适的页面，所以猜测其他事务请求比较激烈或者空间不够，所以加入新空间
+                // 因为当前没有找到合适的页面，所以猜测其他事务请求比较激烈或者空间不够，加入新空间
                 int newPageNumber = this.pageCache.buildNewPageWithData(PageX.init());
                 this.pageIndex.addFreeSpaceForPage(newPageNumber, PageSetting.PAGE_X_MAX_FREE_SPACE);
             }
         }
+        // 还是没有拿到合适页面
         if(Objects.isNull(properPageInfo)){
             Log.logWarningMessage(WarningMessage.CONCURRENCY_HIGH);
             return DataItemSetting.ERROR_INSERT_RESULT;
         }
         Page curPage = null;
         try {
+            // 从页面缓存中拿到页面
             curPage = this.pageCache.getPageByPageNumber(properPageInfo.pageNumber);
-            byte[] log = Logger.buildLogBytes(LoggerSetting.LOG_TYPE_INSERT, xid, curPage.getPageNumber(), PageX.getFreeSpaceOffsetFromPage(curPage), dataRecord);
+            // 先把日志写了
+            byte[] log = Logger.buildLogBytes(LoggerSetting.LOG_TYPE_INSERT, xid, curPage.getPageNumber(), PageX.getFreeSpaceOffsetFromPage(curPage), newDataRecord);
             this.logger.writeLog(log);
-            short dataOffsetInPage = PageX.insertDataIntoPage(curPage, dataRecord);
+            // 再插入数据到页面中，拿到数据偏移量
+            short dataOffsetInPage = PageX.insertDataIntoPage(curPage, newDataRecord);
+            // 资源释放
             curPage.releaseOneReference();
             return Logger.parsePageNumberAndOffsetToUid(properPageInfo.pageNumber, dataOffsetInPage);
         }finally {
@@ -137,10 +162,12 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
         }
     }
 
+    @Override
     public void writeLog(byte[] log){
         this.logger.writeLog(log);
     }
 
+    @Override
     public void releaseOneDataItem(long uid){
         super.releaseOneReference(uid);
     }
@@ -149,6 +176,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
     public void close() {
         super.close();
         this.logger.close();
+        // 注意PageOne关闭时设置VC
         PageOne.setVCWithPageClose(this.pageOne);
         this.pageOne.releaseOneReference();
         this.pageCache.close();

@@ -89,7 +89,7 @@ public class LoggerImpl implements Logger{
         ByteBuffer logBuffer = ByteBuffer.wrap(log);
         this.lock.lock();
         try {
-            FileManager.writeByteDataIntoFileChannel(this.logFileChannel, this.logFileLocationPointer, logBuffer);
+            FileManager.writeByteDataIntoFileChannel(this.logFileChannel, FileManager.getFileChannelSize(this.logFileChannel), logBuffer);
         }
         finally {
             this.lock.unlock();
@@ -183,6 +183,7 @@ public class LoggerImpl implements Logger{
             return null;
         }
         ByteBuffer nextLogSizeBuffer = ByteBuffer.allocate(LoggerSetting.LOGGER_LOG_SIZE_LENGTH);
+        FileManager.readByteDataIntoFileChannel(this.logFileChannel, this.logFileLocationPointer, nextLogSizeBuffer);
         int nextLogSize = ByteParser.parseBytesToInt(nextLogSizeBuffer.array());
         // 再在当前文件指针位置加上下一条完整日志长度，看有没有数据
         if(this.logFileLocationPointer + LoggerSetting.LOGGER_LOG_DATA_OFFSET + nextLogSize > this.logFileOriginLength){

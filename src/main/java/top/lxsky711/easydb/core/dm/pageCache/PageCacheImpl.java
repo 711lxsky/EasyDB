@@ -54,7 +54,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
 
 
     @Override
-    public int getPageNumber() {
+    public int getPagesNumber() {
         return this.pageNumbers.intValue();
     }
 

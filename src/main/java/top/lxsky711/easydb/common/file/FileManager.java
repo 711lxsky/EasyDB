@@ -101,6 +101,18 @@ public class FileManager {
         }
     }
 
+    public static long getFileChannelSize(FileChannel fc){
+        long fileChannelSize = -1L;
+        try {
+            fileChannelSize = fc.size();
+        }catch (IOException e){
+            Log.logWarningMessage(e.getMessage()
+                    + LogSetting.LOG_MASSAGE_CONNECTOR
+                    + WarningMessage.FILE_CHANNEL_GER_INFORMATION_ERROR);
+        }
+        return fileChannelSize;
+    }
+
 
     /**
      * @Author: 711lxsky

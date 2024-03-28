@@ -21,7 +21,7 @@ public interface PageCache {
      * @Author: 711lxsky
      * @Description: 拿到数据库文件中的页数，表示有多少个页面
      */
-    int getPageNumber();
+    int getPagesNumber();
 
     /**
      * @Author: 711lxsky

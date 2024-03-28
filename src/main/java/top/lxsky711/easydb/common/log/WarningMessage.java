@@ -12,6 +12,9 @@ public class WarningMessage {
     public static final String FILE_CHANNEL_DATA_REFRESH_ERROR
             = "The file-channel's data refresh operation has some error!";
 
+    public static final String FILE_CHANNEL_GER_INFORMATION_ERROR
+            = "There are some error happened during getting information from the file-channel!";
+
     public static final String FILE_CREATE_ERROR
             = "There are some mistakes happened during the File create!";
 

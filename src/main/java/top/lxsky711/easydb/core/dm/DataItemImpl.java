@@ -20,7 +20,8 @@ public class DataItemImpl implements DataItem{
 
     private long uid;
 
-    private SubArray dataRecord;
+    // 数据记录，注意这里rawDataRecord里面的rawData可能存储了非常多的冗余数据
+    private SubArray rawDataRecord;
 
     private byte[] oldDataRecord;
 
@@ -33,7 +34,7 @@ public class DataItemImpl implements DataItem{
     private Lock writeLock;
 
     public DataItemImpl(SubArray dataRecord, byte[] oldData, Page page, long uid, DataManager dm){
-        this.dataRecord = dataRecord;
+        this.rawDataRecord = dataRecord;
         this.oldDataRecord = oldData;
         this.page = page;
         this.uid = uid;
@@ -44,21 +45,21 @@ public class DataItemImpl implements DataItem{
     }
 
     @Override
-    public SubArray getData() {
+    public SubArray getDataRecord() {
         return new SubArray(
-                this.dataRecord.rawData,
-                this.dataRecord.start + DataItemSetting.DATA_DATA_OFFSET,
-                this.dataRecord.end);
+                this.rawDataRecord.rawData,
+                this.rawDataRecord.start + DataItemSetting.DATA_DATA_OFFSET,
+                this.rawDataRecord.end);
     }
 
     @Override
-    public SubArray getDataRecord() {
-        return dataRecord;
+    public SubArray getRawDataRecord() {
+        return this.rawDataRecord;
     }
 
     @Override
     public boolean isValid(){
-        return this.dataRecord.rawData[this.dataRecord.start + DataItemSetting.DATA_VALID_OFFSET] == DataItemSetting.DATA_VALID;
+        return this.rawDataRecord.rawData[this.rawDataRecord.start + DataItemSetting.DATA_VALID_OFFSET] == DataItemSetting.DATA_VALID;
     }
 
     @Override
@@ -66,14 +67,16 @@ public class DataItemImpl implements DataItem{
         // 先获取写锁
         this.writeLock.lock();
         this.page.setDirtyStatus(true);
-        System.arraycopy(this.dataRecord.rawData, this.dataRecord.start,
+        // 备份原始数据
+        System.arraycopy(this.rawDataRecord.rawData, this.rawDataRecord.start,
                 this.oldDataRecord, DataItemSetting.DATA_START_POS, this.oldDataRecord.length);
     }
 
     @Override
     public void unBeforeModify() {
+        // 恢复原始数据
         System.arraycopy(this.oldDataRecord, DataItemSetting.DATA_START_POS,
-                this.dataRecord.rawData, this.dataRecord.start, this.oldDataRecord.length);
+                this.rawDataRecord.rawData, this.rawDataRecord.start, this.oldDataRecord.length);
         this.writeLock.unlock();
     }
 
@@ -81,8 +84,9 @@ public class DataItemImpl implements DataItem{
     public void afterModify(long xid) {
         int pageNumber = Logger.getPageNumberFromUid(this.uid);
         short offset = Logger.getOffsetFromUid(this.uid);
-        byte[] newData = Arrays.copyOfRange(this.dataRecord.rawData, this.dataRecord.start, this.dataRecord.end);
-        byte[] logData = Bytes.concat(this.oldDataRecord, newData);
+        // 包裹update类型的日志
+        byte[] newDataRecord = Arrays.copyOfRange(this.rawDataRecord.rawData, this.rawDataRecord.start, this.rawDataRecord.end);
+        byte[] logData = Bytes.concat(this.oldDataRecord, newDataRecord);
         byte[] newUpdateLog = Logger.buildLogBytes(LoggerSetting.LOG_TYPE_UPDATE, xid, pageNumber, offset,logData);
         this.dm.writeLog(newUpdateLog);
     }
