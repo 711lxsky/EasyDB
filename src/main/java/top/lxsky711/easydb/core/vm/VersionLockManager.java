@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.vm;
 
+import top.lxsky711.easydb.common.data.CollectionUtil;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,19 @@ public class VersionLockManager {
     public Lock tryToAcquireResourseLock(long xid, long uid){
         this.selfLock.lock();
         try{
+            // 先看XID事务是否已经持有了目标Record记录
+            if(CollectionUtil.judgeElementInListMap(this.transactionControlledRecords, xid, uid)){
+                return null;
+            }
+            // 如果目标Record记录没有被任何XID事务持有
+            if(! this.recordControlledByTransaction.containsKey(uid)){
+                this.recordControlledByTransaction.put(uid, xid);
+                CollectionUtil.putElementIntoListMap(this.transactionControlledRecords, xid, uid);
+                return null;
+            }
+            // 已经被其他XID事务持有
+            this.transactionWaitForRecord.put(xid, uid);
+            CollectionUtil.putElementIntoListMap(this.recordWaitByTransactions, uid, xid);
 
         }
         finally {
