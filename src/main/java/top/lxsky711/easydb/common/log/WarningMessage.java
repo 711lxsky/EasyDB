@@ -50,4 +50,7 @@ public class WarningMessage {
 
     public static final String CONCURRENCY_HIGH
             = "The current concurrency is high, so the database is busy!";
+
+    public static final String TRANSACTION_ISOLATION_LEVEL_UNKNOWN
+            = "The transaction isolation level is unknown or not support!";
 }
