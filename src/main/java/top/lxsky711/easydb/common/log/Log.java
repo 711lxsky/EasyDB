@@ -31,4 +31,8 @@ public class Log {
     public static void logInfo(String message){
         logger.info(message);
     }
+
+    public static Exception buildException(String message){
+        return new Exception(message);
+    }
 }

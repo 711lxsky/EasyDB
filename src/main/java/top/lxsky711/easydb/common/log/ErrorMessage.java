@@ -50,4 +50,7 @@ public class ErrorMessage {
 
     public static final String LOG_TYPE_ERROR =
             "The log's type may has error which is unknown, check it for real need!";
+
+    public static final String VERSION_CONTROL_RESOURCE_ERROR
+            = "Version control resource disorder!";
 }

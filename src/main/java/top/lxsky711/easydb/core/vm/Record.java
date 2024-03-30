@@ -25,21 +25,26 @@ public class Record {
     // 一条记录存储在一个DataItem中
     private DataItem dataItem;
 
-    private VersionManager vm;
-
-    public Record(long uid, DataItem dataItem, VersionManager vm) {
+    public Record(long uid, DataItem dataItem) {
         this.uid = uid;
         this.dataItem = dataItem;
-        this.vm = vm;
     }
 
-    public static Record buildRecord(long uid, DataItem dataItem, VersionManager vm) {
+    /**
+     * @Author: 711lxsky
+     * @Description: 构建记录
+     */
+    public static Record buildRecord(long uid, DataItem dataItem) {
         if(Objects.isNull(dataItem)){
             return null;
         }
-        return new Record(uid, dataItem, vm);
+        return new Record(uid, dataItem);
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 包装原始数据为记录的字节数组形式
+     */
     public static byte[] wrapDataToRecordBytes(long xid, byte[] data){
         byte[] xmin = ByteParser.longToBytes(xid);
         byte[] xmax = new byte[VMSetting.RECORD_XMAX_LENGTH];
@@ -50,37 +55,49 @@ public class Record {
         return this.uid;
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 获取记录的XMIN
+     */
     public long getXMIN(){
         this.dataItem.readLock();
         try {
             SubArray dataRecord = this.dataItem.getDataRecord();
-            return ByteParser.parseBytesToLong(Arrays.copyOfRange(dataRecord.rawData, dataRecord.start + VMSetting.RECORD_XMIN_OFFSET
-                    , dataRecord.start + VMSetting.RECORD_XMAX_OFFSET));
+            return ByteParser.parseBytesToLong(Arrays.copyOfRange(dataRecord.rawData, dataRecord.start + VMSetting.RECORD_XMIN_OFFSET,
+                    dataRecord.start + VMSetting.RECORD_XMAX_OFFSET));
         }
         finally {
             this.dataItem.readUnlock();
         }
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 获取记录XMAX
+     */
     public long getXMAX(){
         this.dataItem.readLock();
         try {
             SubArray dataRecord = this.dataItem.getDataRecord();
-            return ByteParser.parseBytesToLong(Arrays.copyOfRange(dataRecord.rawData, dataRecord.start + VMSetting.RECORD_XMAX_OFFSET
-                    , dataRecord.start + VMSetting.RECORD_DATA_OFFSET));
+            return ByteParser.parseBytesToLong(Arrays.copyOfRange(dataRecord.rawData, dataRecord.start + VMSetting.RECORD_XMAX_OFFSET,
+                    dataRecord.start + VMSetting.RECORD_DATA_OFFSET));
         }
         finally {
             this.dataItem.readUnlock();
         }
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 获取记录原始数据
+     */
     public byte[] getData(){
         this.dataItem.readLock();
         try {
             SubArray dataRecord = this.dataItem.getDataRecord();
             byte[] justData = new byte[dataRecord.end - dataRecord.start - VMSetting.RECORD_DATA_OFFSET];
-            System.arraycopy(dataRecord.rawData, dataRecord.start + VMSetting.RECORD_DATA_OFFSET
-                    , justData, 0, justData.length);
+            System.arraycopy(dataRecord.rawData, dataRecord.start + VMSetting.RECORD_DATA_OFFSET,
+                    justData, 0, justData.length);
             return justData;
         }
         finally {
@@ -88,19 +105,26 @@ public class Record {
         }
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 设置记录XMAX
+     */
     public void setXMAX(long xid){
         this.dataItem.beforeModify();
         try {
             SubArray dataRecord = this.dataItem.getDataRecord();
             System.arraycopy(ByteParser.longToBytes(xid), 0,
-                    dataRecord.rawData, dataRecord.start + VMSetting.RECORD_XMAX_OFFSET
-                    , VMSetting.RECORD_XMAX_LENGTH);
+                    dataRecord.rawData, dataRecord.start + VMSetting.RECORD_XMAX_OFFSET, VMSetting.RECORD_XMAX_LENGTH);
         }
         finally {
             this.dataItem.afterModify(xid);
         }
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 释放记录引用，实际上就是释放一个DataItem引用
+     */
     public void releaseOneReference(){
         this.dataItem.releaseOneReference();
     }

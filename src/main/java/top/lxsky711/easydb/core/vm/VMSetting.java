@@ -27,4 +27,8 @@ public class VMSetting {
 
     // 事务隔离级别--可重复读
     public static final int TRANSACTION_ISOLATION_LEVEL_REPEATABLE_READ = 52;
+
+    public static final int VERSION_LOCK_DEADLOCK_DETECT_RING_STAMP_DEFAULT = 0;
+
+    public static final int TRANSACTION_XID_ERROR_DEFAULT = -1;
 }

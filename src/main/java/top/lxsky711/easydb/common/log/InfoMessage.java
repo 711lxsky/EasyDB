@@ -39,4 +39,10 @@ public class InfoMessage {
             "********* Recover over. ************" +
                     "\n" +
             "************************************************";
+
+    public static final String TRYING_TO_REVOKE_TRANSACTION =
+            "Trying to revoke transaction...";
+
+    public static final String REVOKE_TRANSACTION_DONE =
+            "Revoke transaction done!";
 }

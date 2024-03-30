@@ -21,25 +21,29 @@ public class Transaction {
     // 当前事务执行(开始)时的活跃事务XID快照集合
     private Set<Long> snapshotXIDsForActiveTransaction;
 
-    // 后续出现问题，这个成员变量会被设置为true，表示事务选择中止
-    private boolean selfAbort;
+    // 意外终止标志，后续出现问题，这个成员变量会被设置为true，表示事务选择中止
+    private boolean accidentalTermination;
 
     public Transaction(long xid, int transactionIsolationLevel) {
         this.xid = xid;
         this.transactionIsolationLevel = transactionIsolationLevel;
-        this.selfAbort = false;
+        this.accidentalTermination = false;
     }
 
     /**
      * @Author: 711lxsky
      * @Description: 构建一个抽象事务
      */
-    public static Transaction buildTransaction(long xid, int transactionIsolationLevel, Map<Long, Record> activeTransactions){
+    public static Transaction buildTransaction(long xid, int transactionIsolationLevel, Map<Long, Transaction> activeTransactions){
         Transaction transaction = new Transaction(xid, transactionIsolationLevel);
-        if(transactionIsolationLevel == VMSetting.TRANSACTION_ISOLATION_LEVEL_REPEATABLE_READ){
+        if(transactionIsolationLevel != VMSetting.TRANSACTION_ISOLATION_LEVEL_READ_COMMITTED){
             transaction.snapshotXIDsForActiveTransaction = activeTransactions.keySet();
         }
         return transaction;
+    }
+
+    public static Transaction buildSuperTransaction(){
+        return new Transaction(TMSetting.SUPER_TRANSACTION_XID, VMSetting.TRANSACTION_ISOLATION_LEVEL_READ_COMMITTED);
     }
 
     /**
@@ -65,11 +69,11 @@ public class Transaction {
         return transactionIsolationLevel;
     }
 
-    public boolean isSelfAbort() {
-        return selfAbort;
+    public boolean isAccidentalTermination() {
+        return accidentalTermination;
     }
 
-    public void setSelfAbort(boolean selfAbort) {
-        this.selfAbort = selfAbort;
+    public void setAccidentalTermination(boolean accidentalTermination) {
+        this.accidentalTermination = accidentalTermination;
     }
 }

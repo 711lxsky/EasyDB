@@ -53,4 +53,10 @@ public class WarningMessage {
 
     public static final String TRANSACTION_ISOLATION_LEVEL_UNKNOWN
             = "The transaction isolation level is unknown or not support!";
+
+    public static final String TRANSACTION_IS_ABORTED
+            = "The transaction is aborted!";
+
+    public static final String VERSION_HOPPING_OCCUR
+            = "The transaction hopping occurs!";
 }

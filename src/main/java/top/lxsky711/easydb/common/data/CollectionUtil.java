@@ -7,7 +7,7 @@ import java.util.Objects;
 
 /**
  * @Author: 711lxsky
- * @Description:
+ * @Description: 集合工具类，方法抽象为泛型使用
  */
 
 public class CollectionUtil {
@@ -32,4 +32,14 @@ public class CollectionUtil {
       listMap.get(desListIndex).add(desElement);
     }
 
+    public static <K, V> void removeElementFromListMap(Map<K, List<V>> listMap, K desListIndex, V desElement){
+        List<V> desList = listMap.get(desListIndex);
+        if(Objects.isNull(desList)){
+            return;
+        }
+        desList.remove(desElement);
+        if(desList.isEmpty()){
+            listMap.remove(desListIndex);
+        }
+    }
 }
