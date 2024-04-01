@@ -53,4 +53,7 @@ public class ErrorMessage {
 
     public static final String VERSION_CONTROL_RESOURCE_ERROR
             = "Version control resource disorder!";
+
+    public static final String B_PLUS_TREE_NODE_DATA_ERROR
+            = "Couldn't get the B+ tree node's data!";
 }
