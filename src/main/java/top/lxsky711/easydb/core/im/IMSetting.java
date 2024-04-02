@@ -2,6 +2,8 @@ package top.lxsky711.easydb.core.im;
 
 import top.lxsky711.easydb.common.data.DataSetting;
 
+import java.util.List;
+
 /**
  * @Author: 711lxsky
  * @Description: 索引管理器配置
@@ -39,6 +41,8 @@ public class IMSetting {
 
     public static final int ROOT_NODE_RIGHT_SON_DEFAULT_KTH = 1;
 
+    public static final long NODE_UID_DEFAULT = 0;
+
     public static final int NODE_UID_LENGTH = DataSetting.LONG_BYTE_SIZE;
 
     public static final long NODE_LAST_KEY_DEFAULT = Long.MAX_VALUE;
@@ -49,5 +53,29 @@ public class IMSetting {
 
     public static final int NODE_SIZE = NODE_HEAD_SIZE + NODE_SON_COUPLE_SIZE * (NODE_BALANCE_NUMBER + 1) * 2;
 
+    public static class SearchNextNodeResult {
+        public long nodeUid;
+        public long nodeSiblingUid;
+    }
+
+    public static class SearchRangeNodeResult {
+        public List<Long> nodeUidList;
+
+        public long nodeSiblingUid;
+    }
+
+    public static class InsertAndSplitNodeResult {
+        public long nodeSiblingUid;
+
+        public long nodeNewSonUid;
+
+        public long nodeNewKey;
+    }
+
+    public static class SplitNodeResult {
+        public long nodeNewSonUid;
+
+        public long nodeNewKey;
+    }
 
 }
