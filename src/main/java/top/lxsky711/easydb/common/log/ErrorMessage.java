@@ -56,4 +56,7 @@ public class ErrorMessage {
 
     public static final String B_PLUS_TREE_NODE_DATA_ERROR
             = "Couldn't get the B+ tree node's data!";
+
+    public static final String IMPORTANT_DATA_ERROR
+            = "The important data has wrong!";
 }
