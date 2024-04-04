@@ -41,8 +41,21 @@ public class InfoMessage {
             "************************************************";
 
     public static final String TRYING_TO_REVOKE_TRANSACTION =
-            "Trying to revoke transaction...";
+            "=============== Attention ==============" +
+                    "\n" +
+            "==== Trying to revoke transaction...====";
 
     public static final String REVOKE_TRANSACTION_DONE =
-            "Revoke transaction done!";
+            "############### Attention ##############" +
+                    "\n" +
+            "####### Revoke transaction done! #######";
+
+    public static final String STATEMENT_SYNTAX_ERROR =
+            "=============== Attention ===============" +
+                    "\n" +
+            "Your SQL statement is:  [%s] " +
+                    "\n" +
+            "it may has syntax error, please check near the :" +
+                    "\n" +
+            "                                           >> %s ";
 }

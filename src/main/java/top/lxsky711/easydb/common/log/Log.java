@@ -32,6 +32,10 @@ public class Log {
         logger.info(message);
     }
 
+    public static String concatMessage(String mainMessage, String...additionalMessages){
+        return String.format(mainMessage, (Object) additionalMessages);
+    }
+
     public static Exception buildException(String message){
         return new Exception(message);
     }

@@ -48,6 +48,18 @@ public class WarningMessage {
     public static final String DATA_TOO_LARGE
             = "The data is too large to insert into the page!";
 
+    public static final String NAME_IS_NULL
+            = "The name is null!";
+
+    public static final String NAME_TOO_LONG
+            = "The name is too long!";
+
+    public static final String NAME_FIRST_CHAR_IS_NOT_LETTER
+            = "The first character of the name must to be a letter!";
+
+    public static final String NAME_CONTAIN_SPECIAL_CHAR
+            = "The name can't contain special character!";
+
     public static final String CONCURRENCY_HIGH
             = "The current concurrency is high, so the database is busy!";
 
@@ -59,4 +71,9 @@ public class WarningMessage {
 
     public static final String VERSION_HOPPING_OCCUR
             = "The transaction hopping occurs!";
+
+    public static final String STATEMENT_NOT_SUPPORT
+            = "The statement is not supported or unknown!";
+
+
 }

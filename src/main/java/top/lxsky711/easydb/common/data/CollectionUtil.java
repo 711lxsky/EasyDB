@@ -42,4 +42,13 @@ public class CollectionUtil {
             listMap.remove(desListIndex);
         }
     }
+
+    public static <V> boolean judgeElementInList(List<V> list, V desElement){
+        for (V element : list){
+            if(element.equals(desElement)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
