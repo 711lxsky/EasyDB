@@ -96,5 +96,19 @@ public class StringUtil {
         return false;
     }
 
+    public static boolean isLegalWildcard(String str){
+        return str.equals("*");
+    }
 
+    public static boolean isLegalCompareOperator(String str){
+        return str.equals(">") || str.equals("<") || str.equals("=");
+    }
+
+    public static boolean isEqualsOperator(String str){
+        return str.equals("=");
+    }
+
+    public static boolean isLegalLogicOperator(String str){
+        return str.equals("and") || str.equals("or");
+    }
 }
