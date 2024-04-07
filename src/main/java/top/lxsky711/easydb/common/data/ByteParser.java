@@ -1,6 +1,9 @@
 package top.lxsky711.easydb.common.data;
 
+import com.google.common.primitives.Bytes;
+
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * @Author: 711lxsky
@@ -9,7 +12,7 @@ import java.nio.ByteBuffer;
 public class ByteParser {
 
     public static long parseBytesToLong(byte[] bytes){
-        ByteBuffer buffer = ByteBuffer.wrap(bytes, ParseSetting.DATA_START_POS, DataSetting.LONG_BYTE_SIZE);
+        ByteBuffer buffer = ByteBuffer.wrap(bytes, DataSetting.DATA_START_POS_DEFAULT, DataSetting.LONG_BYTE_SIZE);
         return buffer.getLong();
     }
 
@@ -19,7 +22,7 @@ public class ByteParser {
     }
 
     public static int parseBytesToInt(byte[] bytes){
-        ByteBuffer buffer = ByteBuffer.wrap(bytes, ParseSetting.DATA_START_POS, DataSetting.INT_BYTE_SIZE);
+        ByteBuffer buffer = ByteBuffer.wrap(bytes, DataSetting.DATA_START_POS_DEFAULT, DataSetting.INT_BYTE_SIZE);
         return buffer.getInt();
     }
 
@@ -28,11 +31,23 @@ public class ByteParser {
     }
 
     public static short parseBytesToShort(byte[] bytes){
-        ByteBuffer buffer = ByteBuffer.wrap(bytes, ParseSetting.DATA_START_POS, DataSetting.SHORT_BYTE_SIZE);
+        ByteBuffer buffer = ByteBuffer.wrap(bytes, DataSetting.DATA_START_POS_DEFAULT, DataSetting.SHORT_BYTE_SIZE);
         return buffer.getShort();
     }
 
     public static byte[] shortToBytes(short value) {
         return ByteBuffer.allocate(DataSetting.SHORT_BYTE_SIZE).putShort(value).array();
+    }
+
+    public static byte[] stringToBytes(String str){
+        byte[] strLengthBytes = intToBytes(str.length());
+        return Bytes.concat(strLengthBytes, str.getBytes());
+    }
+
+    public static DataSetting.StringBytes parseBytesToString(byte[] bytes) {
+        DataSetting.StringBytes stringBytes = new DataSetting.StringBytes();
+        stringBytes.strLength = parseBytesToInt(Arrays.copyOf(bytes, stringBytes.strLengthSize));
+        stringBytes.str = new String(Arrays.copyOfRange(bytes, stringBytes.strLengthSize, stringBytes.strLengthSize + stringBytes.strLength));
+        return stringBytes;
     }
 }

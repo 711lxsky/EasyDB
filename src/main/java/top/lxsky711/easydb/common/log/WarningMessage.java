@@ -75,5 +75,24 @@ public class WarningMessage {
     public static final String STATEMENT_NOT_SUPPORT
             = "The statement is not supported or unknown!";
 
+    public static final String STRING_IS_INVALID
+            = "The string is invalid!";
 
+    public static final String DATA_TYPE_IS_INVALID
+            = "The data type is invalid or not support!";
+
+    public static final String NO_INDEX
+            = "There is none index!";
+
+    public static final String INDEX_IS_NOT_EXIST
+            = "The index is not exist!";
+
+    public static final String COMPARE_OPERATOR_IS_INVALID
+            = "The compare operator is invalid or not support!";
+
+    public static final String EXPRESSION_IS_INVALID
+            = "The expression is invalid!";
+
+    public static final String LOGIC_OPERATOR_IS_INVALID
+            = "The logic operator is invalid or not support!";
 }

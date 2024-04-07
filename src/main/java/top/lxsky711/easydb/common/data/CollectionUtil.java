@@ -1,9 +1,6 @@
 package top.lxsky711.easydb.common.data;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @Author: 711lxsky
@@ -51,4 +48,19 @@ public class CollectionUtil {
         }
         return false;
     }
+
+    // 泛型方法求并集，结果为List
+    public static <T> List<T> getUnionForTwoList(List<T> list1, List<T> list2) {
+        Set<T> set = new HashSet<>(list1);
+        set.addAll(list2);
+        return new ArrayList<>(set);
+    }
+
+    // 泛型方法求交集，结果为List
+    public static <T> List<T> getIntersectionForTwoList(List<T> list1, List<T> list2) {
+        Set<T> set = new HashSet<>(list1);
+        set.retainAll(list2);
+        return new ArrayList<>(set);
+    }
+
 }

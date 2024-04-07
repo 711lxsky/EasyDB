@@ -1,6 +1,8 @@
 package top.lxsky711.easydb.core.tbm;
 
+import top.lxsky711.easydb.core.dm.DataManager;
 import top.lxsky711.easydb.core.sp.SPSetting;
+import top.lxsky711.easydb.core.vm.VersionManager;
 
 /**
  * @Author: 711lxsky
@@ -28,4 +30,8 @@ public interface TableManager {
     byte[] update(long xid, SPSetting.Update update);
 
     byte[] show(long xid);
+
+    DataManager getDM();
+
+    VersionManager getVM();
 }

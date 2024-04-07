@@ -15,4 +15,16 @@ public class TBMSetting {
         public byte[] result;
 
     }
+
+    public static long FIELD_INDEX_DEFAULT = 0L;
+
+    public static class Frontiers {
+        long leftFrontier;
+
+        long rightFrontier;
+    }
+
+    public static final long LEFT_FRONTIER_DEFAULT = Long.MIN_VALUE;
+
+    public static final long RIGHT_FRONTIER_DEFAULT = Long.MAX_VALUE;
 }

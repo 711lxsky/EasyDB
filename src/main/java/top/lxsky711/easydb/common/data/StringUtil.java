@@ -2,7 +2,6 @@ package top.lxsky711.easydb.common.data;
 
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
-import top.lxsky711.easydb.core.sp.SPSetting;
 
 import java.util.Objects;
 
@@ -42,6 +41,10 @@ public class StringUtil {
 
     public static boolean stringEqual(String str1, String str2){
         return str1.equals(str2);
+    }
+
+    public static boolean stringIsBlank(String str){
+        return Objects.isNull(str) || str.isEmpty();
     }
 
     public static boolean stringEqualIgnoreCase(String str1, String str2){
@@ -101,7 +104,12 @@ public class StringUtil {
     }
 
     public static boolean isLegalCompareOperator(String str){
-        return str.equals(">") || str.equals("<") || str.equals("=");
+        for(String compare : DataSetting.COMPARE_DEFAULT){
+            if(compare.equals(str)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean isEqualsOperator(String str){
@@ -109,6 +117,11 @@ public class StringUtil {
     }
 
     public static boolean isLegalLogicOperator(String str){
-        return str.equals("and") || str.equals("or");
+        for(String logic : DataSetting.LOGIC_DEFAULT){
+            if(logic.equals(str)){
+                return true;
+            }
+        }
+        return false;
     }
 }
