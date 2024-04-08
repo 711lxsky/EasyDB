@@ -4,6 +4,7 @@ import com.google.common.primitives.Bytes;
 import top.lxsky711.easydb.common.data.ByteParser;
 import top.lxsky711.easydb.common.data.DataParser;
 import top.lxsky711.easydb.common.data.DataSetting;
+import top.lxsky711.easydb.common.data.StringUtil;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 import top.lxsky711.easydb.core.dm.DataManager;
@@ -64,8 +65,8 @@ public class Field {
     }
 
     private void persistSelf(long transactionXid){
-        byte[] fieldNameBytes = ByteParser.stringToBytes(this.fieldName);
-        byte[] fieldTypeBytes = ByteParser.stringToBytes(this.fieldType);
+        byte[] fieldNameBytes = StringUtil.stringToBytes(this.fieldName);
+        byte[] fieldTypeBytes = StringUtil.stringToBytes(this.fieldType);
         byte[] indexUidBytes = ByteParser.longToBytes(this.indexUid);
         byte[] fieldInfoBytes = Bytes.concat(fieldNameBytes, fieldTypeBytes, indexUidBytes);
         this.uid = this.tableAttributed.getDM().insertData(transactionXid, fieldInfoBytes);
@@ -79,10 +80,10 @@ public class Field {
     }
 
     private void parseSelf(byte[] fieldInfoBytes){
-        DataSetting.StringBytes fieldNameInfo = ByteParser.parseBytesToString(fieldInfoBytes);
+        DataSetting.StringBytes fieldNameInfo = StringUtil.parseBytesToString(fieldInfoBytes);
         this.fieldName = fieldNameInfo.str;
         int readPosition = fieldNameInfo.strLength + fieldNameInfo.strLengthSize;
-        DataSetting.StringBytes fieldTypeInfo = ByteParser.parseBytesToString(Arrays.copyOfRange(fieldInfoBytes, readPosition, fieldInfoBytes.length));
+        DataSetting.StringBytes fieldTypeInfo = StringUtil.parseBytesToString(Arrays.copyOfRange(fieldInfoBytes, readPosition, fieldInfoBytes.length));
         this.fieldType = fieldTypeInfo.str;
         readPosition += fieldTypeInfo.strLength + fieldTypeInfo.strLengthSize;
         this.indexUid = ByteParser.parseBytesToLong(Arrays.copyOfRange(fieldInfoBytes, readPosition, readPosition + DataSetting.LONG_BYTE_SIZE));
@@ -101,6 +102,10 @@ public class Field {
 
     public String getFieldName(){
         return this.fieldName;
+    }
+
+    public String getFieldType(){
+        return this.fieldType;
     }
 
     public TBMSetting.Frontiers getSearchFrontiersDefault(){
@@ -139,4 +144,31 @@ public class Field {
     public List<Long> rangeSearch(long left, long right){
         return this.bPlusTree.searchRangeNodes(left, right);
     }
+
+    public void insert(long uid, long key){
+        this.bPlusTree.insertNode(uid, key);
+    }
+
+    public TBMSetting.BytesDataParseResult parseBytesData(byte[] bytesData){
+        TBMSetting.BytesDataParseResult result = new TBMSetting.BytesDataParseResult();
+        switch(this.fieldType){
+            case DataSetting.DATA_INT32:
+                result.value = ByteParser.parseBytesToInt(Arrays.copyOf(bytesData, DataSetting.INT_BYTE_SIZE));
+                result.shiftFoots = DataSetting.INT_BYTE_SIZE;
+                return result;
+            case DataSetting.DATA_INT64:
+                result.value = ByteParser.parseBytesToLong(Arrays.copyOf(bytesData, DataSetting.LONG_BYTE_SIZE));
+                result.shiftFoots = DataSetting.LONG_BYTE_SIZE;
+                return result;
+            case DataSetting.DATA_STRING:
+                DataSetting.StringBytes stringBytes = StringUtil.parseBytesToString(bytesData);
+                result.value = stringBytes.str;
+                result.shiftFoots = stringBytes.strLengthSize + stringBytes.strLength;
+                return result;
+            default:
+                Log.logWarningMessage(WarningMessage.FIELD_TYPE_IS_NOT_INVALID);
+                return null;
+        }
+    }
+
 }

@@ -1,9 +1,13 @@
 package top.lxsky711.easydb.common.data;
 
+import com.google.common.primitives.Bytes;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * @Author: 711lxsky
@@ -124,4 +128,17 @@ public class StringUtil {
         }
         return false;
     }
+
+    public static byte[] stringToBytes(String str){
+        byte[] strLengthBytes = ByteParser.intToBytes(str.length());
+        return Bytes.concat(strLengthBytes, str.getBytes());
+    }
+
+    public static DataSetting.StringBytes parseBytesToString(byte[] bytes) {
+        DataSetting.StringBytes stringBytes = new DataSetting.StringBytes();
+        stringBytes.strLength = ByteParser.parseBytesToInt(Arrays.copyOf(bytes, stringBytes.strLengthSize));
+        stringBytes.str = new String(Arrays.copyOfRange(bytes, stringBytes.strLengthSize, stringBytes.strLengthSize + stringBytes.strLength));
+        return stringBytes;
+    }
+
 }

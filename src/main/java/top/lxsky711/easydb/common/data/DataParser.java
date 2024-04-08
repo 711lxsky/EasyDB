@@ -58,6 +58,20 @@ public class DataParser {
         }
     }
 
+    public static String parseDataToString(Object data, String dataType){
+        switch (dataType){
+            case DataSetting.DATA_INT32:
+                return String.valueOf((int)data);
+            case DataSetting.DATA_INT64:
+                return String.valueOf((long)data);
+            case DataSetting.DATA_STRING:
+                return (String)data;
+            default:
+                Log.logWarningMessage(WarningMessage.DATA_TYPE_IS_INVALID);
+                return null;
+        }
+    }
+
     public static byte[] parseDataToBytes(Object data, String dataType){
         switch (dataType){
             case DataSetting.DATA_INT32:
@@ -65,7 +79,7 @@ public class DataParser {
             case DataSetting.DATA_INT64:
                 return ByteParser.longToBytes((long)data);
             case DataSetting.DATA_STRING:
-                return ByteParser.stringToBytes((String)data);
+                return StringUtil.stringToBytes((String)data);
             default:
                 Log.logWarningMessage(WarningMessage.DATA_TYPE_IS_INVALID);
                 return null;
@@ -83,4 +97,61 @@ public class DataParser {
                 return null;
         }
     }
+
+    public static boolean judgeTypeSame(Object typeInstance, String value) {
+        if (typeInstance instanceof Integer) {
+            try {
+                Integer.parseInt(value);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        } else if (typeInstance instanceof Long) {
+            try {
+                Long.parseLong(value);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        } else if (typeInstance instanceof Double) {
+            try {
+                Double.parseDouble(value);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        } else if (typeInstance instanceof Float) {
+            try {
+                Float.parseFloat(value);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        } else if (typeInstance instanceof Boolean) {
+            // 通常认为任何字符串都可以转换为Boolean，因为非"true"的字符串都被解释为false
+            return true;
+        } else {
+            // 对于不支持的类型，返回false
+            return false;
+        }
+    }
+
+    public static Object parseDataTypeToFormat(String dataType){
+        if(StringUtil.stringIsBlank(dataType)){
+            Log.logWarningMessage(WarningMessage.STRING_IS_INVALID);
+            return null;
+        }
+        switch (dataType){
+            case DataSetting.DATA_INT32:
+                return Integer.valueOf(dataType);
+            case DataSetting.DATA_INT64:
+                return Long.valueOf(dataType);
+            case DataSetting.DATA_STRING:
+                return dataType;
+            default:
+                Log.logWarningMessage(WarningMessage.DATA_TYPE_IS_INVALID);
+                return null;
+        }
+    }
+
 }

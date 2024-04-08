@@ -1,9 +1,6 @@
 package top.lxsky711.easydb.common.data;
 
-import com.google.common.primitives.Bytes;
-
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /**
  * @Author: 711lxsky
@@ -39,15 +36,8 @@ public class ByteParser {
         return ByteBuffer.allocate(DataSetting.SHORT_BYTE_SIZE).putShort(value).array();
     }
 
-    public static byte[] stringToBytes(String str){
-        byte[] strLengthBytes = intToBytes(str.length());
-        return Bytes.concat(strLengthBytes, str.getBytes());
+    public static byte[] parseStringToNormalBytes(String str){
+        return str.getBytes();
     }
 
-    public static DataSetting.StringBytes parseBytesToString(byte[] bytes) {
-        DataSetting.StringBytes stringBytes = new DataSetting.StringBytes();
-        stringBytes.strLength = parseBytesToInt(Arrays.copyOf(bytes, stringBytes.strLengthSize));
-        stringBytes.str = new String(Arrays.copyOfRange(bytes, stringBytes.strLengthSize, stringBytes.strLengthSize + stringBytes.strLength));
-        return stringBytes;
-    }
 }

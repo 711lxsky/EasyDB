@@ -1,5 +1,6 @@
 package top.lxsky711.easydb.core.tbm;
 
+import top.lxsky711.easydb.common.data.ByteParser;
 import top.lxsky711.easydb.core.dm.DataManager;
 import top.lxsky711.easydb.core.sp.SPSetting;
 import top.lxsky711.easydb.core.vm.VersionManager;
@@ -12,8 +13,6 @@ import top.lxsky711.easydb.core.vm.VersionManager;
 public interface TableManager {
 
     TBMSetting.BeginResult begin(SPSetting.Begin begin);
-
-    byte[] read(long xid);
 
     byte[] commit(long xid);
 
@@ -34,4 +33,15 @@ public interface TableManager {
     DataManager getDM();
 
     VersionManager getVM();
+
+    static TableManager create(String fullFileName, VersionManager vm, DataManager dm){
+        Booter booter = Booter.createBooter(fullFileName);
+        booter.updateBytesDataInBooterFile(ByteParser.longToBytes(TBMSetting.TABLE_UID_DEFAULT));
+        return new TableManagerImpl(vm, dm, booter);
+    }
+
+    static TableManager load(String fullFileName, VersionManager vm, DataManager dm){
+       Booter booter = Booter.openBooter(fullFileName);
+       return new TableManagerImpl(vm, dm, booter);
+    }
 }

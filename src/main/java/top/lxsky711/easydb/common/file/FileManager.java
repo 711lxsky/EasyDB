@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * @Author: 711lxsky
@@ -138,6 +140,10 @@ public class FileManager {
             Log.logWarningMessage(WarningMessage.FILE_NOT_EXIST);
             return null;
         }
+        if(! newFile.canRead() || ! newFile.canWrite()){
+            Log.logWarningMessage(WarningMessage.FILE_USE_ERROR);
+            return null;
+        }
         return newFile;
     }
 
@@ -154,6 +160,10 @@ public class FileManager {
             }
         }catch (IOException e){
             Log.logException(e);
+        }
+        if(! newFile.canRead() || ! newFile.canWrite()){
+            Log.logWarningMessage(WarningMessage.FILE_USE_ERROR);
+            return null;
         }
         return newFile;
     }
@@ -193,5 +203,16 @@ public class FileManager {
         }catch (IOException e){
             Log.logWarningMessage(e.getMessage() + LogSetting.LOG_MASSAGE_CONNECTOR + WarningMessage.FILE_USE_ERROR);
         }
+    }
+
+    public static byte[] readAllBytesWithFilePath(Path filePath){
+        byte[] fileBytes = null;
+        try {
+            fileBytes = Files.readAllBytes(filePath);
+        }
+        catch (IOException e){
+            Log.logErrorMessage(ErrorMessage.BAD_FILE);
+        }
+        return fileBytes;
     }
 }

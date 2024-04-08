@@ -95,4 +95,19 @@ public class WarningMessage {
 
     public static final String LOGIC_OPERATOR_IS_INVALID
             = "The logic operator is invalid or not support!";
+
+    public static final String INSERT_VALUES_NOT_MATCH
+            = "The number of insert values does not match the number of fields!";
+
+    public static final String DATA_ERROR
+            = "The data is error!";
+
+    public static final String FIELD_TYPE_IS_NOT_INVALID
+            = "The field type is invalid or not support!";
+
+    public static final String DUPLICATE_CREATE_TABLE
+            = "The table is already exist!";
+
+    public static final String TABLE_NOT_FOUND
+            = "The table is not found!";
 }
