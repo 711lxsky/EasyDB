@@ -16,18 +16,23 @@ public class TBMSetting {
 
     }
 
+    // 字段索引默认值
     public static long FIELD_INDEX_DEFAULT = 0L;
 
+    // 搜索的边界值
     public static class Frontiers {
         long leftFrontier;
 
         long rightFrontier;
     }
 
+    // 默认左边界值
     public static final long LEFT_FRONTIER_DEFAULT = Long.MIN_VALUE;
 
+    // 默认右边界值
     public static final long RIGHT_FRONTIER_DEFAULT = Long.MAX_VALUE;
 
+    // 字节数组形式的数据库数据解析结果
     public static class BytesDataParseResult{
 
         public Object value;

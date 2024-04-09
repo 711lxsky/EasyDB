@@ -23,10 +23,13 @@ public class Table {
 
     private TableManager tbm;
 
+    // 表唯一标识uid
     private long uid;
 
+    // 表名
     private String name;
 
+    // 下一个表的uid
     private long nextTableUid;
 
     private List<Field> fields;
@@ -44,6 +47,10 @@ public class Table {
         this.fields = new ArrayList<>();
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 创建表
+     */
     public static Table createTable(long transactionXid, TableManager tbm, long nextTableUid, SPSetting.Create create) {
         Table table = new Table(tbm, create.tableName, nextTableUid);
         int fieldNum = create.fieldsName.size();
@@ -57,6 +64,10 @@ public class Table {
         return table;
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 持久化表信息
+     */
     private void persistSelf(long transactionXid) {
         byte[] tableNameBytes = StringUtil.stringToBytes(this.name);
         byte[] nextTableUidBytes = ByteParser.longToBytes(this.nextTableUid);
@@ -71,6 +82,10 @@ public class Table {
         this.uid = this.tbm.getDM().insertData(transactionXid, tableInfoBytes);
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 加载表信息
+     */
     public static Table loadTable(TableManager tbm, long tableUid) {
         byte[] tableInfoBytes = tbm.getVM().read(TMSetting.SUPER_TRANSACTION_XID, tableUid);
         Table table = new Table(tbm, tableUid);
@@ -78,6 +93,10 @@ public class Table {
         return table;
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 解析表信息
+     */
     private void parseSelf(byte[] tableInfoBytes) {
         DataSetting.StringBytes tableNameInfo = StringUtil.parseBytesToString(tableInfoBytes);
         this.name = tableNameInfo.str;
@@ -112,6 +131,10 @@ public class Table {
         return this.uid;
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 查询数据实现
+     */
     public String select(long transactionXid, SPSetting.Select select){
         List<Long> targetUidList = this.analyzeWhere(select.where);
         StringBuilder sb = new StringBuilder();
@@ -121,11 +144,17 @@ public class Table {
         for (Long uid : targetUidList) {
             byte[] raw = this.tbm.getVM().read(transactionXid, uid);
             if(raw == null) continue;
+            // 字段信息提取
             Map<String, Object> entry = this.parseBytesToEntry(raw);
             sb.append(this.parseEntryToString(entry)).append(TBMSetting.LINE_FEED);
         }
         return sb.toString();
     }
+
+    /**
+     * @Author: 711lxsky
+     * @Description: 插入数据实现
+     */
     public void insert(long transactionXid, SPSetting.Insert insert){
         Map<String, Object> entry = this.parseValuesToEntry(insert.values);
         byte[] entryBytes = this.parseEntryToBytes(entry);
@@ -133,6 +162,10 @@ public class Table {
         this.internInsert(uid, entry);
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 删除数据实现
+     */
     public int delete(long transactionXid, SPSetting.Delete delete){
         List<Long> tarUidList = this.analyzeWhere(delete.where);
         int count = 0;
@@ -147,6 +180,10 @@ public class Table {
         return count;
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 更新数据实现
+     */
     public int update(long transactionXid, SPSetting.Update update){
         List<Long> tarUidList = this.analyzeWhere(update.where);
         int count = 0;
@@ -161,6 +198,7 @@ public class Table {
         Object value = DataParser.parseStringToData(update.value, tarField.getFieldType());
         for(Long uid : tarUidList){
             byte[] entryBytes = this.tbm.getVM().read(transactionXid, uid);
+            // 先删
             if(Objects.isNull(entryBytes) || entryBytes.length == 0){
                 continue;
             }
@@ -168,6 +206,7 @@ public class Table {
             Map<String, Object> entry = this.parseBytesToEntry(entryBytes);
             entry.put(tarField.fieldName, value);
             entryBytes = this.parseEntryToBytes(entry);
+            // 后增
             long newUid = this.tbm.getVM().insert(transactionXid, entryBytes);
             count ++;
             this.internInsert(newUid, entry);
@@ -188,6 +227,7 @@ public class Table {
     }
 
     private Map<String, Object> parseValuesToEntry(List<String> values){
+        // 将数据转换为字段数据
         if(values.size() != this.fields.size()){
             Log.logWarningMessage(WarningMessage.INSERT_VALUES_NOT_MATCH);
             return null;
@@ -198,6 +238,7 @@ public class Table {
             Field field = this.fields.get(i);
             String strValue = values.get(i);
             Object fieldTypeFormat = DataParser.parseDataTypeToFormat(field.getFieldType());
+            // 判断数据类型是否匹配
             if(! DataParser.judgeTypeSame(fieldTypeFormat, strValue)){
                 Log.logWarningMessage(WarningMessage.INSERT_VALUES_NOT_MATCH);
                 return null;
@@ -208,6 +249,10 @@ public class Table {
         return entry;
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 转换字段数据为字节数组形式
+     */
     private byte[] parseEntryToBytes(Map<String, Object> entry){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (Field field : fields) {
@@ -224,6 +269,10 @@ public class Table {
         return baos.toByteArray();
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 解析字节数组为字段数据
+     */
     private Map<String, Object> parseBytesToEntry(byte[] bytesEntry){
         int readPosition = 0;
         Map<String, Object> entry = new HashMap<>();
@@ -235,6 +284,10 @@ public class Table {
         return entry;
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 解析字段数据为字符串形式
+     */
     private String parseEntryToString(Map<String, Object> record){
         StringJoiner sj = new StringJoiner(TBMSetting.DELIMITER, TBMSetting.PREFIX_DELIMITER, TBMSetting.SUFFIX_DELIMITER);
         for (Field field : fields) {
@@ -243,6 +296,10 @@ public class Table {
         return sj.toString();
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 获取第一个索引字段
+     */
     private Field getFirstIndexField(){
         Field tarField = null;
         for (Field field : this.fields) {
@@ -254,6 +311,10 @@ public class Table {
         return tarField;
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 内部默认搜索方法
+     */
     private List<Long> internSearchDefault(){
         Field firstIndexField = this.getFirstIndexField();
         if (Objects.isNull(firstIndexField)) {
@@ -285,7 +346,12 @@ public class Table {
         return tarField.rangeSearch(frontiers0.leftFrontier, frontiers0.rightFrontier);
     }
 
+    /**
+     * @Author: 711lxsky
+     * @Description: 解析where语句
+     */
     private List<Long> analyzeWhere(SPSetting.Where where) {
+        // where空，默认搜索
         if (Objects.isNull(where)) {
             return this.internSearchDefault();
         } else {
@@ -295,6 +361,7 @@ public class Table {
             }
             List<Long> result0 = this.internSearch(where.expression1);
             if(Objects.isNull(where.expression2)){
+                // 只有表达式1
                 return result0;
             }
             if(StringUtil.stringIsBlank(where.logic)){
@@ -313,7 +380,6 @@ public class Table {
         for (int i = 0; i < this.fields.size(); i++) {
             Field field = this.fields.get(i);
             sj.add(field.toString());
-
             // Add trailing "}" only for the last field
             if (i == this.fields.size() - 1) {
                 sj.setEmptyValue(TBMSetting.SECOND_PREFIX_DELIMITER + TBMSetting.SECOND_SUFFIX_DELIMITER); // Optional: handle empty fields list
