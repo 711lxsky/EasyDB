@@ -1,13 +1,12 @@
 package top.lxsky711.easydb.common.data;
 
 import com.google.common.primitives.Bytes;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
 
 /**
  * @Author: 711lxsky
@@ -59,7 +58,7 @@ public class StringUtil {
         return str.toLowerCase();
     }
 
-    public static boolean nameIsLegal(String name){
+    public static boolean nameIsLegal(String name) throws WarningException {
         if(Objects.isNull(name) || name.isEmpty() ){
             Log.logWarningMessage(WarningMessage.NAME_IS_NULL);
         }

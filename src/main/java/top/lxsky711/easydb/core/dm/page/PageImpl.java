@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.dm.page;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.core.dm.pageCache.PageCache;
 
 import java.util.concurrent.locks.Lock;
@@ -46,7 +48,7 @@ public class PageImpl implements Page{
     }
 
     @Override
-    public void releaseOneReference() {
+    public void releaseOneReference() throws WarningException, ErrorException {
         this.pageCache.releaseOneReference(this);
     }
 

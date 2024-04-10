@@ -5,6 +5,8 @@ import top.lxsky711.easydb.common.data.ByteParser;
 import top.lxsky711.easydb.common.data.DataParser;
 import top.lxsky711.easydb.common.data.DataSetting;
 import top.lxsky711.easydb.common.data.StringUtil;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 import top.lxsky711.easydb.core.dm.DataManager;
@@ -63,7 +65,7 @@ public class Field {
      * @Author: 711lxsky
      * @Description: 创建字段
      */
-    public static Field createField(long TransactionXid, Table tableAttributed, String fieldName, String fieldType, boolean isIndex) {
+    public static Field createField(long TransactionXid, Table tableAttributed, String fieldName, String fieldType, boolean isIndex) throws WarningException, ErrorException {
         Field field = new Field(tableAttributed, fieldName, fieldType);
         if(isIndex) {
             DataManager dmForAttributedTable = tableAttributed.getDM();
@@ -78,7 +80,7 @@ public class Field {
      * @Author: 711lxsky
      * @Description: 持久化字段
      */
-    private void persistSelf(long transactionXid){
+    private void persistSelf(long transactionXid) throws WarningException, ErrorException {
         byte[] fieldNameBytes = StringUtil.stringToBytes(this.fieldName);
         byte[] fieldTypeBytes = StringUtil.stringToBytes(this.fieldType);
         byte[] indexUidBytes = ByteParser.longToBytes(this.indexUid);
@@ -90,7 +92,7 @@ public class Field {
      * @Author: 711lxsky
      * @Description: 加载字段
      */
-    public static Field loadField(Table tableAttributed, long fieldUid){
+    public static Field loadField(Table tableAttributed, long fieldUid) throws WarningException, ErrorException {
         byte[] fieldInfoBytes = tableAttributed.getVM().read(TMSetting.SUPER_TRANSACTION_XID, fieldUid);
         Field field = new Field(fieldUid, tableAttributed);
         field.parseSelf(fieldInfoBytes);
@@ -101,7 +103,7 @@ public class Field {
      * @Author: 711lxsky
      * @Description: 解析字段
      */
-    private void parseSelf(byte[] fieldInfoBytes){
+    private void parseSelf(byte[] fieldInfoBytes) throws WarningException, ErrorException {
         DataSetting.StringBytes fieldNameInfo = StringUtil.parseBytesToString(fieldInfoBytes);
         this.fieldName = fieldNameInfo.str;
         int readPosition = fieldNameInfo.strLength + fieldNameInfo.strLengthSize;
@@ -146,7 +148,7 @@ public class Field {
      * @Author: 711lxsky
      * @Description: 根据不同逻辑运算符，获取搜索范围
      */
-    public TBMSetting.Frontiers getSearchFrontiers(SPSetting.Expression expression){
+    public TBMSetting.Frontiers getSearchFrontiers(SPSetting.Expression expression) throws WarningException {
         TBMSetting.Frontiers frontiers = new TBMSetting.Frontiers();
         Object value = DataParser.parseStringToData(expression.value, this.fieldType);
         long frontier = DataParser.parseDataToLong(value, this.fieldType);
@@ -176,7 +178,7 @@ public class Field {
      * @Author: 711lxsky
      * @Description: 范围搜索
      */
-    public List<Long> rangeSearch(long left, long right){
+    public List<Long> rangeSearch(long left, long right) throws WarningException, ErrorException {
         return this.bPlusTree.searchRangeNodes(left, right);
     }
 
@@ -184,7 +186,7 @@ public class Field {
      * @Author: 711lxsky
      * @Description: 插入数据
      */
-    public void insert(long uid, long key){
+    public void insert(long uid, long key) throws WarningException, ErrorException {
         this.bPlusTree.insertNode(uid, key);
     }
 
@@ -192,7 +194,7 @@ public class Field {
      * @Author: 711lxsky
      * @Description: 解析字节数组数据
      */
-    public TBMSetting.BytesDataParseResult parseBytesData(byte[] bytesData){
+    public TBMSetting.BytesDataParseResult parseBytesData(byte[] bytesData) throws WarningException {
         TBMSetting.BytesDataParseResult result = new TBMSetting.BytesDataParseResult();
         switch(this.fieldType){
             case DataSetting.DATA_INT32:

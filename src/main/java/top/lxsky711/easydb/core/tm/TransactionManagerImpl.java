@@ -1,6 +1,8 @@
 package top.lxsky711.easydb.core.tm;
 
 import top.lxsky711.easydb.common.data.ByteParser;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
@@ -39,7 +41,7 @@ public class TransactionManagerImpl implements TransactionManager{
         this.counterLock = new ReentrantLock();
     }
 
-    public void initCreate(){
+    public void initCreate() throws WarningException, ErrorException {
         ByteBuffer xidFileHeaderBuf = ByteBuffer.wrap(new byte[TMSetting.XID_FILE_HEADER_LENGTH]);
         FileManager.writeByteDataIntoFileChannel(this.xidFileChannel, TMSetting.XID_FILE_HEADER_OFFSET, xidFileHeaderBuf);
         FileManager.forceRefreshFileChannel(this.xidFileChannel, false);
@@ -50,7 +52,7 @@ public class TransactionManagerImpl implements TransactionManager{
      * @Description: 开始事务，文件头计数器增1，返回事务XID
      */
     @Override
-    public long begin() {
+    public long begin() throws WarningException, ErrorException {
         this.counterLock.lock();
         try {
             long newXid = this.transactionCounter + 1;
@@ -64,17 +66,17 @@ public class TransactionManagerImpl implements TransactionManager{
     }
 
     @Override
-    public void commit(long xid) {
+    public void commit(long xid) throws WarningException, ErrorException {
         this.updateXIDStatus(xid, TMSetting.TRANSACTION_COMMITTED);
     }
 
     @Override
-    public void abort(long xid) {
+    public void abort(long xid) throws WarningException, ErrorException {
         this.updateXIDStatus(xid, TMSetting.TRANSACTION_ABORTED);
     }
 
     @Override
-    public boolean isActive(long xid) {
+    public boolean isActive(long xid) throws ErrorException {
         if(xid == TMSetting.SUPER_TRANSACTION_XID) {
             return false;
         }
@@ -82,7 +84,7 @@ public class TransactionManagerImpl implements TransactionManager{
     }
 
     @Override
-    public boolean isCommitted(long xid) {
+    public boolean isCommitted(long xid) throws ErrorException {
         if(xid == TMSetting.SUPER_TRANSACTION_XID) {
             return true;
         }
@@ -90,7 +92,7 @@ public class TransactionManagerImpl implements TransactionManager{
     }
 
     @Override
-    public boolean isAborted(long xid) {
+    public boolean isAborted(long xid) throws ErrorException {
         if(xid == TMSetting.SUPER_TRANSACTION_XID) {
             return false;
         }
@@ -98,7 +100,7 @@ public class TransactionManagerImpl implements TransactionManager{
     }
 
     @Override
-    public void close() {
+    public void close() throws ErrorException {
         FileManager.closeFileAndChannel(this.xidFileChannel, this.xidFile);
     }
 
@@ -106,7 +108,7 @@ public class TransactionManagerImpl implements TransactionManager{
      * @Author: 711lxsky
      * @Description: 更新计数器并写入文件刷盘
      */
-    private void addOneForXIDCounter(){
+    private void addOneForXIDCounter() throws WarningException, ErrorException {
         this.transactionCounter ++;
         ByteBuffer counterBuffer = ByteBuffer.wrap(ByteParser.longToBytes(this.transactionCounter));
         FileManager.writeByteDataIntoFileChannel(this.xidFileChannel, TMSetting.XID_FILE_HEADER_OFFSET, counterBuffer);
@@ -117,7 +119,7 @@ public class TransactionManagerImpl implements TransactionManager{
      * @Author: 711lxsky
      * @Description: 检查当前事务计数器以及XID文件是否合法
      */
-    protected void checkXIDCounter() {
+    protected void checkXIDCounter() throws ErrorException {
         // 检查文件合法
         long xidFileLength = FileManager.getRAFileLength(this.xidFile);
         if(xidFileLength < TMSetting.XID_FILE_HEADER_LENGTH){
@@ -147,7 +149,7 @@ public class TransactionManagerImpl implements TransactionManager{
      * @Author: 711lxsky
      * @Description: 检查某个XID状态是否是目标状态
      */
-    private boolean checkXIDStatus(long xid, byte status){
+    private boolean checkXIDStatus(long xid, byte status) throws ErrorException {
         long xidOffset = this.getXIDStatusPos(xid);
         ByteBuffer xidStatus = ByteBuffer.wrap(new byte[TMSetting.TRANSACTION_STATUS_SIZE]);
         FileManager.readByteDataIntoFileChannel(this.xidFileChannel, xidOffset, xidStatus);
@@ -159,7 +161,7 @@ public class TransactionManagerImpl implements TransactionManager{
      * @Author: 711lxsky
      * @Description: 更新某个XID为指定状态，并刷盘
      */
-    private void updateXIDStatus(long xid, byte status){
+    private void updateXIDStatus(long xid, byte status) throws WarningException, ErrorException {
         long xidOffset = this.getXIDStatusPos(xid);
         byte[] xidStatus = this.getBytesWithXIDStatus(status);
         ByteBuffer newStatus = ByteBuffer.wrap(xidStatus);

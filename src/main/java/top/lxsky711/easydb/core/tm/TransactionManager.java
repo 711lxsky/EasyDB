@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.tm;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
@@ -38,50 +40,50 @@ public interface TransactionManager {
      * @Author: 711lxsky
      * @Description: 开启新事务
      */
-    long begin();
+    long begin() throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 提交新事务
      */
-    void commit(long xid);
+    void commit(long xid) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 取消事务
      */
-    void abort(long xid);
+    void abort(long xid) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 查询某个事务状态是否为活动状态
      */
-    boolean isActive(long xid);
+    boolean isActive(long xid) throws ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 查询某个事务状态是否为已提交状态
      */
-    boolean isCommitted(long xid);
+    boolean isCommitted(long xid) throws ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 查询某个事务状态是否为已回滚状态
      */
-    boolean isAborted(long xid);
+    boolean isAborted(long xid) throws ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 关闭事务管理器
      */
-    void close();
+    void close() throws ErrorException;
 
 
     /**
      * @Author: 711lxsky
      * @Description: 根据某个路径创建一个新的事务管理器
      */
-     static TransactionManagerImpl create(String xidFileFullName){
+     static TransactionManagerImpl create(String xidFileFullName) throws WarningException, ErrorException {
         // 创建基础文件
         File newFile = FileManager.createFile(xidFileFullName + TMSetting.XID_FILE_SUFFIX);
         return buildTMWithFile(newFile, false);
@@ -92,13 +94,13 @@ public interface TransactionManager {
      * @Author: 711lxsky
      * @Description: 根据某个路径打开一个事务管理器
      */
-    static TransactionManagerImpl open(String xidFileFullName){
+    static TransactionManagerImpl open(String xidFileFullName) throws WarningException, ErrorException {
         // 创建基础文件
         File newFile = FileManager.openFile(xidFileFullName + TMSetting.XID_FILE_SUFFIX);
         return buildTMWithFile(newFile, true);
     }
 
-    static TransactionManagerImpl buildTMWithFile(File file, boolean isOpen){
+    static TransactionManagerImpl buildTMWithFile(File file, boolean isOpen) throws ErrorException, WarningException {
         if(Objects.nonNull(file)){
             RandomAccessFile xidFile = FileManager.buildRAFile(file);
             if (xidFile != null) {

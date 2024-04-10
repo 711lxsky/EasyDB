@@ -1,5 +1,8 @@
 package top.lxsky711.easydb.core.dm.page;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
+
 /**
  * @Author: 711lxsky
  * @Description: 参考大部分数据库设计，将数据的读写操作封装为以页面Page为单位
@@ -24,7 +27,7 @@ public interface Page {
      * @Author: 711lxsky
      * @Description: 释放页面缓存
      */
-    void releaseOneReference();
+    void releaseOneReference() throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky

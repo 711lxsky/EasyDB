@@ -1,6 +1,8 @@
 package top.lxsky711.easydb.core.im;
 
 import top.lxsky711.easydb.common.data.ByteParser;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.core.common.SubArray;
@@ -44,7 +46,7 @@ public class BPlusTreeNode {
      * @Author: 711lxsky
      * @Description: 借助B+树和节点uid加载节点
      */
-    public static BPlusTreeNode loadBPlusTreeNode(BPlusTree tree, long nodeUid){
+    public static BPlusTreeNode loadBPlusTreeNode(BPlusTree tree, long nodeUid) throws WarningException, ErrorException {
         DataItem nodeDataItem = tree.getDm().readDataItem(nodeUid);
         if(Objects.isNull(nodeDataItem)){
             Log.logErrorMessage(ErrorMessage.B_PLUS_TREE_NODE_DATA_ERROR);
@@ -92,7 +94,7 @@ public class BPlusTreeNode {
      * @Author: 711lxsky
      * @Description: 释放一个引用
      */
-    public void releaseOneReference(){
+    public void releaseOneReference() throws WarningException, ErrorException {
         this.dataItem.releaseOneReference();
     }
 
@@ -166,7 +168,7 @@ public class BPlusTreeNode {
      * @Author: 711lxsky
      * @Description: 插入某个节点，并且判断是否需要分裂，如有需要完成分裂
      */
-    public IMSetting.InsertAndSplitNodeResult insertAndSplit(long insertNodeUid, long insertNodeKey){
+    public IMSetting.InsertAndSplitNodeResult insertAndSplit(long insertNodeUid, long insertNodeKey) throws WarningException, ErrorException {
         IMSetting.InsertAndSplitNodeResult result = new IMSetting.InsertAndSplitNodeResult();
         result.nodeNewSonUid = IMSetting.NODE_UID_DEFAULT;
         boolean insertSuccess = false;
@@ -245,7 +247,7 @@ public class BPlusTreeNode {
      * @Author: 711lxsky
      * @Description: 分裂节点
      */
-    private IMSetting.SplitNodeResult splitNode(){
+    private IMSetting.SplitNodeResult splitNode() throws WarningException, ErrorException {
         SubArray newNodeData = new SubArray(new byte[IMSetting.NODE_SIZE], 0, IMSetting.NODE_SIZE);
         // 按照当前节点的性质复制一下
         setNodeLeafFlag(newNodeData, judgeNodeIsLeaf(this.nodeData));

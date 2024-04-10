@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.vm;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 import top.lxsky711.easydb.core.tm.TransactionManager;
@@ -15,7 +17,7 @@ public class VisibilityJudge {
      * @Author: 711lxsky
      * @Description: 判断记录是否出现版本跳跃
      */
-    public static boolean judgeVersionHopping(TransactionManager tm, Transaction transaction, Record record){
+    public static boolean judgeVersionHopping(TransactionManager tm, Transaction transaction, Record record) throws ErrorException {
         if(transaction.getTransactionIsolationLevel() == VMSetting.TRANSACTION_ISOLATION_LEVEL_READ_COMMITTED){
             return false;
         }
@@ -27,7 +29,7 @@ public class VisibilityJudge {
      * @Author: 711lxsky
      * @Description: 针对特定事务隔离级别，判断记录对事务是否可见
      */
-    public static boolean judgeVisibility(TransactionManager tm, Transaction transaction, Record record){
+    public static boolean judgeVisibility(TransactionManager tm, Transaction transaction, Record record) throws WarningException, ErrorException {
         long transactionXid = transaction.getXid();
         long recordXmin = record.getXMIN();
         long recordXmax = record.getXMAX();
@@ -50,7 +52,7 @@ public class VisibilityJudge {
      * @Author: 711lxsky
      * @Description: 读提交级别判断
      */
-    private static boolean judgeForReadCommitted(TransactionManager tm, long transactionXid, long recordXmin, long recordXmax){
+    private static boolean judgeForReadCommitted(TransactionManager tm, long transactionXid, long recordXmin, long recordXmax) throws ErrorException {
         // 如果记录由某个已经提交的事务创建
         if(tm.isCommitted(recordXmax)){
             // 如果还未被删除，则可见
@@ -71,7 +73,7 @@ public class VisibilityJudge {
      * @Author: 711lxsky
      * @Description: 重复读级别判断
      */
-    private static boolean judgeForRepeatableRead(TransactionManager tm, Transaction transaction, long recordXmin, long recordXmax){
+    private static boolean judgeForRepeatableRead(TransactionManager tm, Transaction transaction, long recordXmin, long recordXmax) throws ErrorException {
         long transactionXid = transaction.getXid();
         // 如果记录由某个已经提交的事务创建，且该事务在当前事务执行之前提交
         if(tm.isCommitted(recordXmin) && (recordXmin < transactionXid && !transaction.isInSnapshot(recordXmin))){

@@ -1,6 +1,8 @@
 package top.lxsky711.easydb.core.vm;
 
 import top.lxsky711.easydb.common.data.DataSetting;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.InfoMessage;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
@@ -32,7 +34,7 @@ public class VersionManagerImpl extends AbstractCache<Record> implements Version
 
     private Lock selfLock;
 
-    public VersionManagerImpl(TransactionManager tm, DataManager dm) {
+    public VersionManagerImpl(TransactionManager tm, DataManager dm) throws ErrorException {
         super(DataSetting.DATA_CACHE_DEFAULT_SIZE);
         this.tm = tm;
         this.dm = dm;
@@ -44,18 +46,18 @@ public class VersionManagerImpl extends AbstractCache<Record> implements Version
     }
 
     @Override
-    protected Record getCacheFromDataSourceByKey(long uid) {
+    protected Record getCacheFromDataSourceByKey(long uid) throws WarningException, ErrorException {
         DataItem dataItem = this.dm.readDataItem(uid);
         return Record.buildRecord(uid, dataItem);
     }
 
     @Override
-    protected void releaseCacheForObject(Record record) {
+    protected void releaseCacheForObject(Record record) throws WarningException, ErrorException {
         record.releaseOneReference();
     }
 
     @Override
-    public long begin(int transactionIsolationLevel) {
+    public long begin(int transactionIsolationLevel) throws WarningException, ErrorException {
         this.selfLock.lock();
         try {
             long xid = this.tm.begin();
@@ -72,7 +74,7 @@ public class VersionManagerImpl extends AbstractCache<Record> implements Version
      * @Author: 711lxsky
      * @Description: 检查事务是否已经意外终止
      */
-    private Transaction checkTransactionAborted(long xid){
+    private Transaction checkTransactionAborted(long xid) throws WarningException {
         this.selfLock.lock();
         Transaction tarTransaction = this.activeTransactions.get(xid);
         this.selfLock.unlock();
@@ -84,7 +86,7 @@ public class VersionManagerImpl extends AbstractCache<Record> implements Version
     }
 
     @Override
-    public byte[] read(long xid, long uid) {
+    public byte[] read(long xid, long uid) throws WarningException, ErrorException {
         Transaction tarTransaction = this.checkTransactionAborted(xid);
         if(Objects.isNull(tarTransaction)){
             return null;
@@ -104,7 +106,7 @@ public class VersionManagerImpl extends AbstractCache<Record> implements Version
     }
 
     @Override
-    public long insert(long xid, byte[] data) {
+    public long insert(long xid, byte[] data) throws WarningException, ErrorException {
         Transaction tarTransaction = this.checkTransactionAborted(xid);
         if(Objects.isNull(tarTransaction)){
             return VMSetting.TRANSACTION_XID_ERROR_DEFAULT;
@@ -114,7 +116,7 @@ public class VersionManagerImpl extends AbstractCache<Record> implements Version
     }
 
     @Override
-    public boolean delete(long xid, long uid) {
+    public boolean delete(long xid, long uid) throws WarningException, ErrorException {
         Transaction tarTransaction = this.checkTransactionAborted(xid);
         if(Objects.isNull(tarTransaction)){
             return false;
@@ -153,7 +155,7 @@ public class VersionManagerImpl extends AbstractCache<Record> implements Version
     }
 
     @Override
-    public void commit(long xid) {
+    public void commit(long xid) throws WarningException, ErrorException {
         Transaction tarTransaction = this.checkTransactionAborted(xid);
         if(Objects.nonNull(tarTransaction)){
             this.selfLock.lock();
@@ -165,7 +167,7 @@ public class VersionManagerImpl extends AbstractCache<Record> implements Version
     }
 
     @Override
-    public void abort(long xid) {
+    public void abort(long xid) throws WarningException, ErrorException {
         this.internAbortTransaction(xid);
     }
 
@@ -173,7 +175,7 @@ public class VersionManagerImpl extends AbstractCache<Record> implements Version
      * @Author: 711lxsky
      * @Description: 内部事务撤销方法
      */
-    private void internAbortTransaction(long xid){
+    private void internAbortTransaction(long xid) throws WarningException, ErrorException {
         Log.logInfo(InfoMessage.TRYING_TO_REVOKE_TRANSACTION);
         Transaction tarTransaction = this.checkTransactionAborted(xid);
         if(Objects.nonNull(tarTransaction)){

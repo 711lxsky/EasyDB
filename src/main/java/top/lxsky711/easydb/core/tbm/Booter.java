@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.tbm;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
@@ -31,14 +33,14 @@ public class Booter {
     }
 
     // 创建一个新的booter文件
-    public static Booter createBooter(String booterFileFullName) {
+    public static Booter createBooter(String booterFileFullName) throws WarningException, ErrorException {
         removeBooterTmpFile(booterFileFullName);
         File booterFile = FileManager.createFile(booterFileFullName + TBMSetting.BOOTER_SUFFIX);
         return new Booter(booterFileFullName, booterFile);
     }
 
     // 打开一个已经存在的booter文件
-    public static Booter openBooter(String booterFileFullName) {
+    public static Booter openBooter(String booterFileFullName) throws WarningException {
         removeBooterTmpFile(booterFileFullName);
         File booterFile = FileManager.openFile(booterFileFullName + TBMSetting.BOOTER_SUFFIX);
         return new Booter(booterFileFullName, booterFile);
@@ -50,12 +52,12 @@ public class Booter {
     }
 
     // 读取booter文件中的所有数据(uid信息)
-    public byte[] readAllBytesDataInBooterFile(){
+    public byte[] readAllBytesDataInBooterFile() throws ErrorException {
         return FileManager.readAllBytesWithFilePath(this.booterFile.toPath());
     }
 
     // 更新booter文件中的数据(uid信息)
-    public void updateBytesDataInBooterFile(byte[] dataBytes){
+    public void updateBytesDataInBooterFile(byte[] dataBytes) throws ErrorException, WarningException {
         // 先写入一个临时文件
         File booterTmpFile = new File(this.booterFileFullName + TBMSetting.BOOTER_TMP_SUFFIX);
         try {

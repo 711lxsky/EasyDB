@@ -1,6 +1,7 @@
 package top.lxsky711.easydb.core.sp;
 
 import top.lxsky711.easydb.common.data.StringUtil;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 
@@ -36,7 +37,7 @@ public class Tokenizer {
      * @Author: 711lxsky
      * @Description: 获取当前解析出的token
      */
-    public String peek(){
+    public String peek() throws WarningException {
         if(this.needFlushToken){
             this.curToken = this.nextMetaState();
             this.needFlushToken = false;
@@ -56,7 +57,7 @@ public class Tokenizer {
      * @Author: 711lxsky
      * @Description: 解析下一个token
      */
-    private String nextMetaState(){
+    private String nextMetaState() throws WarningException {
         while(true){
             Byte b = this.peekByte();
             if(b == null){
@@ -90,7 +91,7 @@ public class Tokenizer {
      * @Author: 711lxsky
      * @Description:  获取下一个 \ 和 " 包含的token
      */
-    private String nextQuoteState(){
+    private String nextQuoteState() throws WarningException {
         Byte quote = this.peekByte();
         this.popByte();
         StringBuilder sb = new StringBuilder();
@@ -153,7 +154,7 @@ public class Tokenizer {
      * @Author: 711lxsky
      * @Description: 警告解析错误
      */
-    public String StateAnalysisWrong(){
+    public String StateAnalysisWrong() throws WarningException {
         Log.logWarningMessage(WarningMessage.STATEMENT_NOT_SUPPORT);
         return null;
     }

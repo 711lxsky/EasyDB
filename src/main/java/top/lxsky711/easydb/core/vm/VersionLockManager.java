@@ -1,9 +1,11 @@
 package top.lxsky711.easydb.core.vm;
 
 import top.lxsky711.easydb.common.data.CollectionUtil;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.ErrorMessage;
-import top.lxsky711.easydb.common.log.ExceptionMassage;
 import top.lxsky711.easydb.common.log.Log;
+import top.lxsky711.easydb.common.log.WarningMessage;
 
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +55,7 @@ public class VersionLockManager {
      * 如果可以直接成功拿到，就返回null
      * 否则需要等待，返回锁
      */
-    public Lock tryToAcquireResourseLock(long xid, long uid) throws Exception{
+    public Lock tryToAcquireResourseLock(long xid, long uid) throws WarningException, ErrorException {
         this.selfLock.lock();
         try{
             // 先看XID事务是否已经持有了目标Record记录
@@ -73,8 +75,7 @@ public class VersionLockManager {
                 // 这里先注释掉，因为死锁检测到之后，会尝试撤销某个事务，所以就先不删掉记录
 //                this.transactionWaitForRecord.remove(xid);
 //                CollectionUtil.removeElementFromListMap(this.recordWaitByTransactions, uid, xid);
-                Log.logWarningMessage(ExceptionMassage.VERSION_CONTROL_DEAD_LOCK_OCCUR);
-                throw Log.buildException(ExceptionMassage.VERSION_CONTROL_DEAD_LOCK_OCCUR);
+                Log.logWarningMessage(WarningMessage.VERSION_CONTROL_DEAD_LOCK_OCCUR);
             }
             // 放入等待队列
             Lock waitLock = new ReentrantLock();
@@ -98,7 +99,7 @@ public class VersionLockManager {
      * @Author: 711lxsky
      * @Description: 死锁检测
      */
-    private boolean detectDeadlock(){
+    private boolean detectDeadlock() throws ErrorException {
         this.transactionStamp = new HashMap<>();
         this.stampMark = VMSetting.VERSION_LOCK_DEADLOCK_DETECT_RING_STAMP_DEFAULT;
         // 从已经获取资源的事务中寻找
@@ -122,7 +123,7 @@ public class VersionLockManager {
      * @Author: 711lxsky
      * @Description: 深度优先搜索检测死锁
      */
-    private boolean deepFirstSearchForDeadLock(long searchXid){
+    private boolean deepFirstSearchForDeadLock(long searchXid) throws ErrorException {
         Integer searchXidStamp = this.transactionStamp.get(searchXid);
         // 存在环，有死锁
         if(Objects.nonNull(searchXidStamp) && searchXidStamp == this.stampMark){

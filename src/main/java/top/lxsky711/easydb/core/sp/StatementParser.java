@@ -2,6 +2,7 @@ package top.lxsky711.easydb.core.sp;
 
 import top.lxsky711.easydb.common.data.CollectionUtil;
 import top.lxsky711.easydb.common.data.StringUtil;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.InfoMessage;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.core.vm.VMSetting;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class StatementParser {
 
-    public static Object Parse(byte[] statement){
+    public static Object Parse(byte[] statement) throws WarningException {
         Tokenizer tokenizer = new Tokenizer(statement);
         String tokenHead = StringUtil.parseStringToLowerCase(tokenizer.peek());
         tokenizer.pop();
@@ -53,7 +54,7 @@ public class StatementParser {
      * 结构: begin [isolation level] [read committed | repeatable read]
      * 例子: begin isolation level read committed
      */
-    private static SPSetting.Begin parseBegin(Tokenizer tokenizer){
+    private static SPSetting.Begin parseBegin(Tokenizer tokenizer) throws WarningException {
         String isolation = StringUtil.parseStringToLowerCase(tokenizer.peek());
         SPSetting.Begin begin = new SPSetting.Begin();
         if(StringUtil.stringEqual(SPSetting.TOKEN_END_DEFAULT, isolation)){
@@ -115,7 +116,7 @@ public class StatementParser {
      * commit语句后面不应该有其他内容
      * 结构: commit
      */
-    private static SPSetting.Commit parseCommit(Tokenizer tokenizer){
+    private static SPSetting.Commit parseCommit(Tokenizer tokenizer) throws WarningException {
         if(isStatementAnalyseEnd(tokenizer)){
             return new SPSetting.Commit();
         }
@@ -128,7 +129,7 @@ public class StatementParser {
      * abort语句后面不应该有其他内容
      * 结构: abort
      */
-    private static SPSetting.Abort parseAbort(Tokenizer tokenizer){
+    private static SPSetting.Abort parseAbort(Tokenizer tokenizer) throws WarningException {
         if(isStatementAnalyseEnd(tokenizer)){
             return new SPSetting.Abort();
         }
@@ -149,7 +150,7 @@ public class StatementParser {
      *                   name string,
      *                   (index id)
      */
-    private static SPSetting.Create parseCreate(Tokenizer tokenizer){
+    private static SPSetting.Create parseCreate(Tokenizer tokenizer) throws WarningException {
         String table = StringUtil.parseStringToLowerCase(tokenizer.peek());
         if(! StringUtil.stringEqual(SPSetting.TOKEN_TABLE_DEFAULT, table)){
             return (SPSetting.Create) parseStatementWrong(tokenizer);
@@ -230,7 +231,7 @@ public class StatementParser {
      * 结构: drop table [tableName]
      * 例子: drop table test
      */
-    private static SPSetting.Drop parseDrop(Tokenizer tokenizer){
+    private static SPSetting.Drop parseDrop(Tokenizer tokenizer) throws WarningException {
         String table = StringUtil.parseStringToLowerCase(tokenizer.peek());
         if(! StringUtil.stringEqual(SPSetting.TOKEN_TABLE_DEFAULT, table)){
             return (SPSetting.Drop) parseStatementWrong(tokenizer);
@@ -258,7 +259,7 @@ public class StatementParser {
      *             where ...
      * 例子: select id, name from test where id < 5
      */
-    private static SPSetting.Select parseSelect(Tokenizer tokenizer){
+    private static SPSetting.Select parseSelect(Tokenizer tokenizer) throws WarningException {
         SPSetting.Select select = new SPSetting.Select();
         List<String> fieldNameList = new ArrayList<>();
         String next = tokenizer.peek();
@@ -311,7 +312,7 @@ public class StatementParser {
      * 结构: insert into [tableName] values [value1], [value2], ...
      * 例子: insert into test values 1, 'test'
      */
-    private static SPSetting.Insert parseInsert(Tokenizer tokenizer){
+    private static SPSetting.Insert parseInsert(Tokenizer tokenizer) throws WarningException {
         SPSetting.Insert insert = new SPSetting.Insert();
         String into = StringUtil.parseStringToLowerCase(tokenizer.peek());
         if(! StringUtil.stringEqual(SPSetting.TOKEN_INTO_DEFAULT, into)){
@@ -348,7 +349,7 @@ public class StatementParser {
      * 结构: delete from [tableName] where ...
      * 例子: delete from test where id < 5
      */
-    public static SPSetting.Delete parseDelete(Tokenizer tokenizer){
+    public static SPSetting.Delete parseDelete(Tokenizer tokenizer) throws WarningException {
         SPSetting.Delete delete = new SPSetting.Delete();
         String from = StringUtil.parseStringToLowerCase(tokenizer.peek());
         if(! StringUtil.stringEqual(SPSetting.TOKEN_FROM_DEFAULT, from)){
@@ -376,7 +377,7 @@ public class StatementParser {
      * 结构: update [tableName] set [fieldName] = [value] where ...
      * 例子: update test set id = 5 where name = 'test'
      */
-    private static SPSetting.Update parseUpdate(Tokenizer tokenizer){
+    private static SPSetting.Update parseUpdate(Tokenizer tokenizer) throws WarningException {
         SPSetting.Update update = new SPSetting.Update();
         String tableName = tokenizer.peek();
         if(! StringUtil.nameIsLegal(tableName)){
@@ -414,7 +415,7 @@ public class StatementParser {
      * @Author: 711lxsky
      * @Description: 解析show语句
      */
-    private static SPSetting.Show parseShow(Tokenizer tokenizer){
+    private static SPSetting.Show parseShow(Tokenizer tokenizer) throws WarningException {
         SPSetting.Show show = new SPSetting.Show();
         if(! isStatementAnalyseEnd(tokenizer)){
             return (SPSetting.Show) parseStatementWrong(tokenizer);
@@ -427,7 +428,7 @@ public class StatementParser {
      * @Description: 解析where语句
      * 目前只支持两个条件表示式
      */
-    private static SPSetting.Where parseWhere(Tokenizer tokenizer){
+    private static SPSetting.Where parseWhere(Tokenizer tokenizer) throws WarningException {
         SPSetting.Where where = new SPSetting.Where();
         String whereStr = StringUtil.parseStringToLowerCase(tokenizer.peek());
         if(! StringUtil.stringEqual(SPSetting.TOKEN_WHERE_DEFAULT, whereStr)){
@@ -458,7 +459,7 @@ public class StatementParser {
      * @Author: 711lxsky
      * @Description: 解析一个逻辑表达式
      */
-    private static SPSetting.Expression parseOneExpression(Tokenizer tokenizer){
+    private static SPSetting.Expression parseOneExpression(Tokenizer tokenizer) throws WarningException {
         SPSetting.Expression expression = new SPSetting.Expression();
         String fieldName = tokenizer.peek();
         if(! StringUtil.nameIsLegal(fieldName)){
@@ -485,7 +486,7 @@ public class StatementParser {
      * @Author: 711lxsky
      * @Description: 打印语法错误警告信息
      */
-    private static Object parseStatementWrong(Tokenizer tokenizer){
+    private static Object parseStatementWrong(Tokenizer tokenizer) throws WarningException {
         String fullStatement = new String(tokenizer.getStatement());
         String errorToken = tokenizer.peek();
         Log.logInfo(Log.concatMessage(InfoMessage.STATEMENT_SYNTAX_ERROR, fullStatement, errorToken));
@@ -496,7 +497,7 @@ public class StatementParser {
      * @Author: 711lxsky
      * @Description: 判断是否解析完毕
      */
-    private static boolean isStatementAnalyseEnd(Tokenizer tokenizer){
+    private static boolean isStatementAnalyseEnd(Tokenizer tokenizer) throws WarningException {
         return StringUtil.stringEqual(SPSetting.TOKEN_END_DEFAULT, tokenizer.peek());
     }
 

@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.dm;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.InfoMessage;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.core.dm.logger.Logger;
@@ -24,7 +26,7 @@ public class Recover {
      * @Author: 711lxsky
      * @Description: 恢复数据
      */
-    public static void recover(TransactionManager tm, Logger logger, PageCache pageCache){
+    public static void recover(TransactionManager tm, Logger logger, PageCache pageCache) throws WarningException, ErrorException {
         Log.logInfo(InfoMessage.RECOVER_START);
         logger.rewind();
         byte[] log;
@@ -54,7 +56,7 @@ public class Recover {
      * @Author: 711lxsky
      * @Description: 重做所有已经完成的日志
      */
-    private static void redoTransactions(TransactionManager tm, Logger logger, PageCache pc){
+    private static void redoTransactions(TransactionManager tm, Logger logger, PageCache pc) throws WarningException, ErrorException {
         logger.rewind();
         byte[] log;
         while(Objects.nonNull(log = logger.readNextLogData())){
@@ -78,7 +80,7 @@ public class Recover {
      * @Author: 711lxsky
      * @Description: 撤销所有未完成的事务
      */
-    private static void undoTransactions(TransactionManager tm, Logger logger, PageCache pc){
+    private static void undoTransactions(TransactionManager tm, Logger logger, PageCache pc) throws WarningException, ErrorException {
         Map<Long, List<byte[]>> waitUndoLogs = new HashMap<>();
         logger.rewind();
         byte[] log;
@@ -115,7 +117,7 @@ public class Recover {
      * @Author: 711lxsky
      * @Description: 进行插入日志的恢复
      */
-    private static void doInsetLog(PageCache pc, byte[] log, int redoOrUndo){
+    private static void doInsetLog(PageCache pc, byte[] log, int redoOrUndo) throws ErrorException, WarningException {
         LoggerSetting.InsertLog insertLog = Logger.parseLogBytesToInsertLog(log);
         Page page = pc.getPageByPageNumber(insertLog.pageNumber);
         try {
@@ -133,7 +135,7 @@ public class Recover {
      * @Author: 711lxsky
      * @Description: 进行更新日志的恢复
      */
-    private static void doUpdateLog(PageCache pc, byte[] log, int redoOrUndo){
+    private static void doUpdateLog(PageCache pc, byte[] log, int redoOrUndo) throws WarningException, ErrorException {
         LoggerSetting.UpdateLog updateLog = Logger.parseLogBytesToUpdateLog(log);
         Page page = pc.getPageByPageNumber(updateLog.pageNumber);
         byte[] useData;

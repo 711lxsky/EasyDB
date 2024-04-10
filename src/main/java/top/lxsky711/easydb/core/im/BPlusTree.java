@@ -1,6 +1,8 @@
 package top.lxsky711.easydb.core.im;
 
 import top.lxsky711.easydb.common.data.ByteParser;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.core.common.SubArray;
@@ -53,7 +55,7 @@ public class BPlusTree {
      * @Author: 711lxsky
      * @Description: 构建B+树
      */
-    public static long createBPlusTree(DataManager dm){
+    public static long createBPlusTree(DataManager dm) throws WarningException, ErrorException {
         byte[] rootNodeDataBytes = BPlusTreeNode.buildLeafNodeBytes();
         long rootUid = dm.insertData(TMSetting.SUPER_TRANSACTION_XID, rootNodeDataBytes);
         // 插入操作生成的唯一uid,注意，非rootUid，而是获取到DataItem对象的uid
@@ -64,7 +66,7 @@ public class BPlusTree {
      * @Author: 711lxsky
      * @Description: 加载B+树
      */
-    public static BPlusTree loadBPlusTree(DataManager dm, long rootUidPosUid){
+    public static BPlusTree loadBPlusTree(DataManager dm, long rootUidPosUid) throws WarningException, ErrorException {
         DataItem rootUidDataItem = dm.readDataItem(rootUidPosUid);
         if(Objects.isNull(rootUidDataItem)){
             Log.logErrorMessage(ErrorMessage.IMPORTANT_DATA_ERROR);
@@ -97,7 +99,7 @@ public class BPlusTree {
      * @Author: 711lxsky
      * @Description: 更新 rootUid 到磁盘中
      */
-    private void updateRootUid(long leftSonUid, long rightSonUid, long rightKey){
+    private void updateRootUid(long leftSonUid, long rightSonUid, long rightKey) throws WarningException, ErrorException {
         this.selfLock.lock();
         try{
             byte[] newRootDataBytes = BPlusTreeNode.buildRootNodeBytes(leftSonUid, rightSonUid, rightKey);
@@ -116,7 +118,7 @@ public class BPlusTree {
      * @Author: 711lxsky
      * @Description: 搜索满足条件的下一层节点
      */
-    private long searchNextNode(long nodeUid, long key){
+    private long searchNextNode(long nodeUid, long key) throws ErrorException, WarningException {
         while(true){
             BPlusTreeNode node = BPlusTreeNode.loadBPlusTreeNode(this, nodeUid);
             if(Objects.isNull(node)){
@@ -139,7 +141,7 @@ public class BPlusTree {
      * @Author: 711lxsky
      * @Description: 查找某个符合条件的叶子节点
      */
-    private long searchLeafNode(long nodeUid, long key){
+    private long searchLeafNode(long nodeUid, long key) throws ErrorException, WarningException {
         BPlusTreeNode node = BPlusTreeNode.loadBPlusTreeNode(this, nodeUid);
         if(Objects.isNull(node)){
             Log.logErrorMessage(ErrorMessage.IMPORTANT_DATA_ERROR);
@@ -161,7 +163,7 @@ public class BPlusTree {
      * @Author: 711lxsky
      * @Description: 在叶子节点中进行范围搜索
      */
-    public List<Long> searchRangeNodes(long leftKey, long rightKey){
+    public List<Long> searchRangeNodes(long leftKey, long rightKey) throws ErrorException, WarningException {
         long curRootUid = this.getRootUid();
         // 先定位到叶子节点
         long leafNodeUid = this.searchLeafNode(curRootUid, leftKey);
@@ -193,7 +195,7 @@ public class BPlusTree {
      * @Author: 711lxsky
      * @Description: 暴露给外部模块，插入节点
      */
-    public void insertNode(long insertNodeUid, long key){
+    public void insertNode(long insertNodeUid, long key) throws ErrorException, WarningException {
         long curRootUid = this.getRootUid();
         IMSetting.InsertNodeResult result = internalInsertNode(curRootUid, insertNodeUid, key);
         if(Objects.isNull(result)){
@@ -211,7 +213,7 @@ public class BPlusTree {
      * @Author: 711lxsky
      * @Description: 内部插入封装
      */
-    private IMSetting.InsertNodeResult internalInsertNode(long nodeUid, long insertNodeUid, long key){
+    private IMSetting.InsertNodeResult internalInsertNode(long nodeUid, long insertNodeUid, long key) throws ErrorException, WarningException {
         BPlusTreeNode node = BPlusTreeNode.loadBPlusTreeNode(this, nodeUid);
         if(Objects.isNull(node)){
             Log.logErrorMessage(ErrorMessage.IMPORTANT_DATA_ERROR);
@@ -249,7 +251,7 @@ public class BPlusTree {
      * @Author: 711lxsky
      * @Description: 插入并在必要时分裂节点
      */
-    private IMSetting.InsertNodeResult insertAndSplitNode(long nodeUid, long tarUid, long key){
+    private IMSetting.InsertNodeResult insertAndSplitNode(long nodeUid, long tarUid, long key) throws ErrorException, WarningException {
         while(true){
             BPlusTreeNode node = BPlusTreeNode.loadBPlusTreeNode(this, nodeUid);
             if(Objects.isNull(node)){
@@ -273,7 +275,7 @@ public class BPlusTree {
         }
     }
 
-    public void close(){
+    public void close() throws WarningException, ErrorException {
         this.rootUidDataItem.releaseOneReference();
     }
 

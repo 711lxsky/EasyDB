@@ -1,6 +1,7 @@
 package top.lxsky711.easydb.core.dm.page;
 
 import top.lxsky711.easydb.common.data.ByteParser;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 
@@ -29,7 +30,7 @@ public class PageX {
      * @Author: 711lxsky
      * @Description: 将数据插入到页面中，并返回数据的偏移量
      */
-    public static short insertDataIntoPage(Page page, byte[] data){
+    public static short insertDataIntoPage(Page page, byte[] data) throws WarningException {
         if(data.length > getFreeSpaceForPage(page)){
             Log.logWarningMessage(WarningMessage.PAGE_FREE_SPACE_NOT_ENOUGH);
         }

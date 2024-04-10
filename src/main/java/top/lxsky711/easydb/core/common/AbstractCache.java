@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.common;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
@@ -34,7 +36,7 @@ public abstract class AbstractCache<T> {
 
     private Lock lock;
 
-    public AbstractCache(int maxResourceNum) {
+    public AbstractCache(int maxResourceNum) throws ErrorException {
         if(maxResourceNum <= 0){
             Log.logErrorMessage(ErrorMessage.CACHE_RESOURCE_NUMBER_ERROR);
         }
@@ -51,7 +53,7 @@ public abstract class AbstractCache<T> {
      * @Description: 获取某个资源，可能是从缓存中拿到，也可能是去获取，然后放入缓存
      * 所以这个方法本身也就是在获取缓存数据
      */
-    protected T getResource(long key) {
+    protected T getResource(long key) throws WarningException, ErrorException {
         while(true){
             this.lock.lock();
             // 如果请求的资源一直在被其他线程获取，就反复等待尝试
@@ -104,7 +106,7 @@ public abstract class AbstractCache<T> {
      * @Author: 711lxsky
      * @Description: 释放一个资源引用
      */
-    protected void releaseOneReference(long key){
+    protected void releaseOneReference(long key) throws WarningException, ErrorException {
         this.lock.lock();
         try {
             // 把引用数 - 1
@@ -130,7 +132,7 @@ public abstract class AbstractCache<T> {
      * @Author: 711lxsky
      * @Description: 安全关闭缓存，并将资源数据写回
      */
-    protected void close(){
+    protected void close() throws ErrorException, WarningException {
         this.lock.lock();
         try{
             Set<Long> keys = this.cacheData.keySet();
@@ -150,13 +152,13 @@ public abstract class AbstractCache<T> {
      * @Author: 711lxsky
      * @Description: 当资源不在缓存中时，从数据源加载获取
      */
-    protected abstract T getCacheFromDataSourceByKey(long cacheKey);
+    protected abstract T getCacheFromDataSourceByKey(long cacheKey) throws ErrorException, WarningException;
 
     /**
      * @Author: 711lxsky
      * @Description: 释放缓存，并写回文件/磁盘
      * 写回一般指的是将脏页数据写入到对应硬盘或者其他持久化存储设备中
      */
-    protected abstract void releaseCacheForObject(T Object);
+    protected abstract void releaseCacheForObject(T Object) throws WarningException, ErrorException;
 
 }

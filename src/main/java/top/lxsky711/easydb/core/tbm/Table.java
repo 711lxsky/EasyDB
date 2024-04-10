@@ -2,6 +2,8 @@ package top.lxsky711.easydb.core.tbm;
 
 import com.google.common.primitives.Bytes;
 import top.lxsky711.easydb.common.data.*;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 import top.lxsky711.easydb.core.dm.DataManager;
@@ -51,7 +53,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 创建表
      */
-    public static Table createTable(long transactionXid, TableManager tbm, long nextTableUid, SPSetting.Create create) {
+    public static Table createTable(long transactionXid, TableManager tbm, long nextTableUid, SPSetting.Create create) throws WarningException, ErrorException {
         Table table = new Table(tbm, create.tableName, nextTableUid);
         int fieldNum = create.fieldsName.size();
         for (int i = 0; i < fieldNum; i++) {
@@ -68,7 +70,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 持久化表信息
      */
-    private void persistSelf(long transactionXid) {
+    private void persistSelf(long transactionXid) throws WarningException, ErrorException {
         byte[] tableNameBytes = StringUtil.stringToBytes(this.name);
         byte[] nextTableUidBytes = ByteParser.longToBytes(this.nextTableUid);
         int fieldsUidBytesSize = this.fields.size() * DataSetting.LONG_BYTE_SIZE;
@@ -86,7 +88,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 加载表信息
      */
-    public static Table loadTable(TableManager tbm, long tableUid) {
+    public static Table loadTable(TableManager tbm, long tableUid) throws WarningException, ErrorException {
         byte[] tableInfoBytes = tbm.getVM().read(TMSetting.SUPER_TRANSACTION_XID, tableUid);
         Table table = new Table(tbm, tableUid);
         table.parseSelf(tableInfoBytes);
@@ -97,7 +99,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 解析表信息
      */
-    private void parseSelf(byte[] tableInfoBytes) {
+    private void parseSelf(byte[] tableInfoBytes) throws WarningException, ErrorException {
         DataSetting.StringBytes tableNameInfo = StringUtil.parseBytesToString(tableInfoBytes);
         this.name = tableNameInfo.str;
         int readPosition = tableNameInfo.strLength + tableNameInfo.strLengthSize;
@@ -135,7 +137,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 查询数据实现
      */
-    public String select(long transactionXid, SPSetting.Select select){
+    public String select(long transactionXid, SPSetting.Select select) throws WarningException, ErrorException {
         List<Long> targetUidList = this.analyzeWhere(select.where);
         StringBuilder sb = new StringBuilder();
         if(Objects.isNull(targetUidList)){
@@ -155,7 +157,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 插入数据实现
      */
-    public void insert(long transactionXid, SPSetting.Insert insert){
+    public void insert(long transactionXid, SPSetting.Insert insert) throws WarningException, ErrorException {
         Map<String, Object> entry = this.parseValuesToEntry(insert.values);
         byte[] entryBytes = this.parseEntryToBytes(entry);
         long uid = this.tbm.getVM().insert(transactionXid, entryBytes);
@@ -166,7 +168,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 删除数据实现
      */
-    public int delete(long transactionXid, SPSetting.Delete delete){
+    public int delete(long transactionXid, SPSetting.Delete delete) throws WarningException, ErrorException {
         List<Long> tarUidList = this.analyzeWhere(delete.where);
         int count = 0;
         if(Objects.isNull(tarUidList)){
@@ -184,7 +186,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 更新数据实现
      */
-    public int update(long transactionXid, SPSetting.Update update){
+    public int update(long transactionXid, SPSetting.Update update) throws WarningException, ErrorException {
         List<Long> tarUidList = this.analyzeWhere(update.where);
         int count = 0;
         if(Objects.isNull(tarUidList)){
@@ -214,7 +216,7 @@ public class Table {
         return count;
     }
 
-    private void internInsert(long uid,  Map<String, Object> entry){
+    private void internInsert(long uid,  Map<String, Object> entry) throws WarningException, ErrorException {
         for(Field field : this.fields){
             if(field.isIndex()){
                 long key = TBMSetting.RIGHT_FRONTIER_DEFAULT;
@@ -226,7 +228,7 @@ public class Table {
         }
     }
 
-    private Map<String, Object> parseValuesToEntry(List<String> values){
+    private Map<String, Object> parseValuesToEntry(List<String> values) throws WarningException {
         // 将数据转换为字段数据
         if(values.size() != this.fields.size()){
             Log.logWarningMessage(WarningMessage.INSERT_VALUES_NOT_MATCH);
@@ -253,7 +255,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 转换字段数据为字节数组形式
      */
-    private byte[] parseEntryToBytes(Map<String, Object> entry){
+    private byte[] parseEntryToBytes(Map<String, Object> entry) throws WarningException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (Field field : fields) {
             try {
@@ -273,7 +275,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 解析字节数组为字段数据
      */
-    private Map<String, Object> parseBytesToEntry(byte[] bytesEntry){
+    private Map<String, Object> parseBytesToEntry(byte[] bytesEntry) throws WarningException {
         int readPosition = 0;
         Map<String, Object> entry = new HashMap<>();
         for(Field field : this.fields){
@@ -288,7 +290,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 解析字段数据为字符串形式
      */
-    private String parseEntryToString(Map<String, Object> record){
+    private String parseEntryToString(Map<String, Object> record) throws WarningException {
         StringJoiner sj = new StringJoiner(TBMSetting.DELIMITER, TBMSetting.PREFIX_DELIMITER, TBMSetting.SUFFIX_DELIMITER);
         for (Field field : fields) {
             sj.add(DataParser.parseDataToString(record.get(field.fieldName), field.getFieldType()));
@@ -315,7 +317,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 内部默认搜索方法
      */
-    private List<Long> internSearchDefault(){
+    private List<Long> internSearchDefault() throws WarningException, ErrorException {
         Field firstIndexField = this.getFirstIndexField();
         if (Objects.isNull(firstIndexField)) {
             Log.logWarningMessage(WarningMessage.NO_INDEX);
@@ -336,7 +338,7 @@ public class Table {
         return tarField;
     }
 
-    private List<Long> internSearch(SPSetting.Expression expression){
+    private List<Long> internSearch(SPSetting.Expression expression) throws WarningException, ErrorException {
         Field tarField = this.seekFieldWithName(expression.fieldName);
         if (Objects.isNull(tarField)) {
             Log.logWarningMessage(WarningMessage.INDEX_IS_NOT_EXIST);
@@ -350,7 +352,7 @@ public class Table {
      * @Author: 711lxsky
      * @Description: 解析where语句
      */
-    private List<Long> analyzeWhere(SPSetting.Where where) {
+    private List<Long> analyzeWhere(SPSetting.Where where) throws WarningException, ErrorException {
         // where空，默认搜索
         if (Objects.isNull(where)) {
             return this.internSearchDefault();

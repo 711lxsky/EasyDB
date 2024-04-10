@@ -1,6 +1,7 @@
 package top.lxsky711.easydb.core.common;
 
 import org.junit.Test;
+import top.lxsky711.easydb.common.exception.ErrorException;
 import top.lxsky711.easydb.common.log.Log;
 
 import java.security.SecureRandom;
@@ -15,11 +16,17 @@ public class CacheTest {
     private MockCache cache;
     
     @Test
-    public void testCache() {
+    public void testCache() throws ErrorException {
         cache = new MockCache();
         cdl = new CountDownLatch(200);
         for(int i = 0; i < 200; i ++) {
-            Runnable r = () -> work();
+            Runnable r = () -> {
+                try {
+                    work();
+                } catch (ErrorException e) {
+                    throw new RuntimeException(e);
+                }
+            };
             new Thread(r).run();
         }
         try {
@@ -29,7 +36,7 @@ public class CacheTest {
         }
     }
 
-    private void work() {
+    private void work() throws ErrorException {
         for(int i = 0; i < 1000; i++) {
             long uid = random.nextInt();
             long h = 0;

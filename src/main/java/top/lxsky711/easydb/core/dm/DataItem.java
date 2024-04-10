@@ -2,6 +2,8 @@ package top.lxsky711.easydb.core.dm;
 
 import com.google.common.primitives.Bytes;
 import top.lxsky711.easydb.common.data.ByteParser;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.core.common.SubArray;
 import top.lxsky711.easydb.core.dm.logger.Logger;
 import top.lxsky711.easydb.core.dm.page.Page;
@@ -52,13 +54,13 @@ public interface DataItem {
      * @Author: 711lxsky
      * @Description: 数据修改之后的操作
      */
-    void afterModify(long xid);
+    void afterModify(long xid) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 释放一个引用
      */
-    void releaseOneReference();
+    void releaseOneReference() throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky

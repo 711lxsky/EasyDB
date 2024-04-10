@@ -1,6 +1,8 @@
 package top.lxsky711.easydb.core.tm;
 
 import org.junit.Test;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 
 import java.io.File;
 import java.security.SecureRandom;
@@ -29,12 +31,20 @@ public class TMTest {
     private CountDownLatch cdl;
 
     @Test
-    public void testMultiThread() {
+    public void testMultiThread() throws WarningException, ErrorException {
         tmger = TransactionManager.create("/tmp/tranmger_test");
         transMap = new ConcurrentHashMap<>();
         cdl = new CountDownLatch(noWorkers);
         for(int i = 0; i < noWorkers; i ++) {
-            Runnable r = () -> worker();
+            Runnable r = () -> {
+                try {
+                    worker();
+                } catch (WarningException e) {
+                    throw new RuntimeException(e);
+                } catch (ErrorException e) {
+                    throw new RuntimeException(e);
+                }
+            };
             new Thread(r).run();
         }
         try {
@@ -45,7 +55,7 @@ public class TMTest {
         assert new File("/tmp/tranmger_test.xid").delete();
     }
 
-    private void worker() {
+    private void worker() throws WarningException, ErrorException {
         boolean inTrans = false;
         long transXID = 0;
         for(int i = 0; i < noWorks; i ++) {

@@ -1,6 +1,8 @@
 package top.lxsky711.easydb.core.dm;
 
 import com.google.common.primitives.Bytes;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.core.common.SubArray;
 import top.lxsky711.easydb.core.dm.logger.Logger;
 import top.lxsky711.easydb.core.dm.logger.LoggerSetting;
@@ -81,7 +83,7 @@ public class DataItemImpl implements DataItem{
     }
 
     @Override
-    public void afterModify(long xid) {
+    public void afterModify(long xid) throws WarningException, ErrorException {
         int pageNumber = Logger.getPageNumberFromUid(this.uid);
         short offset = Logger.getOffsetFromUid(this.uid);
         // 包裹update类型的日志
@@ -92,7 +94,7 @@ public class DataItemImpl implements DataItem{
     }
 
     @Override
-    public void releaseOneReference() {
+    public void releaseOneReference() throws WarningException, ErrorException {
         this.dm.releaseOneDataItem(this.uid);
     }
 

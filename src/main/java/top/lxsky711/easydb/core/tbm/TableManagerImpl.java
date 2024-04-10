@@ -1,6 +1,8 @@
 package top.lxsky711.easydb.core.tbm;
 
 import top.lxsky711.easydb.common.data.ByteParser;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 import top.lxsky711.easydb.core.dm.DataManager;
@@ -32,7 +34,7 @@ public class TableManagerImpl implements TableManager{
 
     private Lock selfLock;
 
-    public TableManagerImpl(VersionManager vm, DataManager dm, Booter booter){
+    public TableManagerImpl(VersionManager vm, DataManager dm, Booter booter) throws WarningException, ErrorException {
         this.vm = vm;
         this.dm = dm;
         this.booter = booter;
@@ -42,7 +44,7 @@ public class TableManagerImpl implements TableManager{
         this.loadTables();
     }
 
-    private void loadTables(){
+    private void loadTables() throws WarningException, ErrorException {
         long tableUid = this.getFirstTableUid();
         while(tableUid != TBMSetting.TABLE_UID_DEFAULT){
             Table table = Table.loadTable(this, tableUid);
@@ -51,13 +53,13 @@ public class TableManagerImpl implements TableManager{
         }
     }
 
-    private long getFirstTableUid(){
+    private long getFirstTableUid() throws ErrorException {
         byte[] tableInfoBytes = this.booter.readAllBytesDataInBooterFile();
         return ByteParser.parseBytesToLong(tableInfoBytes);
     }
 
     @Override
-    public TBMSetting.BeginResult begin(SPSetting.Begin begin) {
+    public TBMSetting.BeginResult begin(SPSetting.Begin begin) throws WarningException, ErrorException {
         TBMSetting.BeginResult result = new TBMSetting.BeginResult();
         result.transactionXid = this.vm.begin(begin.TRANSACTION_ISOLATION_LEVEL);
         result.result =ByteParser.parseStringToNormalBytes(SPSetting.TOKEN_BEGIN_DEFAULT);
@@ -65,24 +67,24 @@ public class TableManagerImpl implements TableManager{
     }
 
     @Override
-    public byte[] commit(long transactionXid) {
+    public byte[] commit(long transactionXid) throws WarningException, ErrorException {
         this.vm.commit(transactionXid);
         return ByteParser.parseStringToNormalBytes(SPSetting.TOKEN_COMMIT_DEFAULT);
     }
 
     @Override
-    public byte[] abort(long transactionXid) {
+    public byte[] abort(long transactionXid) throws WarningException, ErrorException {
         this.vm.abort(transactionXid);
         return ByteParser.parseStringToNormalBytes(SPSetting.TOKEN_ABORT_DEFAULT);
     }
 
-    private void updateFirstTableUid(long newFirstTableUid){
+    private void updateFirstTableUid(long newFirstTableUid) throws WarningException, ErrorException {
         byte[] uidBytes = ByteParser.longToBytes(newFirstTableUid);
         this.booter.updateBytesDataInBooterFile(uidBytes);
     }
 
     @Override
-    public byte[] create(long transactionXid, SPSetting.Create create) {
+    public byte[] create(long transactionXid, SPSetting.Create create) throws WarningException, ErrorException {
         this.selfLock.lock();
         try {
             if(this.tableCache.containsKey(create.tableName)){
@@ -110,7 +112,7 @@ public class TableManagerImpl implements TableManager{
     }
 
     @Override
-    public byte[] insert(long transactionXid, SPSetting.Insert insert) {
+    public byte[] insert(long transactionXid, SPSetting.Insert insert) throws WarningException, ErrorException {
         Table tableFromCache = this.getTableFromCache(insert.tableName);
         if(Objects.isNull(tableFromCache)){
             Log.logWarningMessage(WarningMessage.TABLE_NOT_FOUND);
@@ -121,7 +123,7 @@ public class TableManagerImpl implements TableManager{
     }
 
     @Override
-    public byte[] select(long transactionXid, SPSetting.Select select) {
+    public byte[] select(long transactionXid, SPSetting.Select select) throws WarningException, ErrorException {
         Table tableFromCache = this.getTableFromCache(select.tableName);
         if(Objects.isNull(tableFromCache)){
             Log.logWarningMessage(WarningMessage.TABLE_NOT_FOUND);
@@ -131,7 +133,7 @@ public class TableManagerImpl implements TableManager{
     }
 
     @Override
-    public byte[] delete(long transactionXid, SPSetting.Delete delete) {
+    public byte[] delete(long transactionXid, SPSetting.Delete delete) throws WarningException, ErrorException {
         Table tableFromCache = this.getTableFromCache(delete.tableName);
         if(Objects.isNull(tableFromCache)){
             Log.logWarningMessage(WarningMessage.TABLE_NOT_FOUND);
@@ -142,7 +144,7 @@ public class TableManagerImpl implements TableManager{
     }
 
     @Override
-    public byte[] update(long transactionXid, SPSetting.Update update) {
+    public byte[] update(long transactionXid, SPSetting.Update update) throws WarningException, ErrorException {
         Table tableFromCache = this.getTableFromCache(update.tableName);
         if(Objects.isNull(tableFromCache)){
             Log.logWarningMessage(WarningMessage.TABLE_NOT_FOUND);

@@ -1,12 +1,14 @@
 package top.lxsky711.easydb.core.dm.logger;
 
 import org.junit.Test;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 
 import java.io.File;
 
 public class LoggerTest {
     @Test
-    public void testLogger() {
+    public void testLogger() throws WarningException, ErrorException {
         Logger lg = Logger.create("/tmp/logger_test1");
         lg.writeLog("aaa".getBytes());
         lg.writeLog("bbb".getBytes());

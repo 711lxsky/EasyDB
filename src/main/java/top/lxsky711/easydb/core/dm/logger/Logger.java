@@ -2,6 +2,8 @@ package top.lxsky711.easydb.core.dm.logger;
 
 import com.google.common.primitives.Bytes;
 import top.lxsky711.easydb.common.data.ByteParser;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
@@ -37,7 +39,7 @@ public interface Logger {
      * @Author: 711lxsky
      * @Description: 写入日志
      */
-    void writeLog(byte[] data);
+    void writeLog(byte[] data) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
@@ -49,31 +51,31 @@ public interface Logger {
      * @Author: 711lxsky
      * @Description: 读取下一条日志信息
      */
-    byte [] readNextLogData();
+    byte [] readNextLogData() throws ErrorException, WarningException;
 
     /**
      * @Author: 711lxsky
      * @Description: 截断日志文件到指定长度
      */
-    void truncate(long length);
+    void truncate(long length) throws WarningException;
 
     /**
      * @Author: 711lxsky
      * @Description: 关闭日志
      */
-    void close();
+    void close() throws ErrorException;
 
-    static LoggerImpl create(String logFileFullName){
+    static LoggerImpl create(String logFileFullName) throws WarningException, ErrorException {
         File newFile = FileManager.createFile(logFileFullName + LoggerSetting.LOGGER_FILE_SUFFIX);
         return buildLoggerWithFile(newFile, false);
     }
 
-    static LoggerImpl open(String logFileFullName){
+    static LoggerImpl open(String logFileFullName) throws WarningException, ErrorException {
         File newFile = FileManager.openFile(logFileFullName + LoggerSetting.LOGGER_FILE_SUFFIX);
         return buildLoggerWithFile(newFile, true);
     }
 
-    static LoggerImpl buildLoggerWithFile(File file, boolean isOpen){
+    static LoggerImpl buildLoggerWithFile(File file, boolean isOpen) throws WarningException, ErrorException {
         if(Objects.nonNull(file)){
             RandomAccessFile logFile = FileManager.buildRAFile(file);
             if(Objects.nonNull(logFile)){
@@ -93,7 +95,7 @@ public interface Logger {
         return null;
     }
 
-    static byte getLogType(byte[] log){
+    static byte getLogType(byte[] log) throws ErrorException {
         byte logType =  log[LoggerSetting.LOG_TYPE_OFFSET];
         if(logType != LoggerSetting.LOG_TYPE_INSERT && logType != LoggerSetting.LOG_TYPE_UPDATE){
             Log.logErrorMessage(ErrorMessage.LOG_TYPE_ERROR);
@@ -105,7 +107,7 @@ public interface Logger {
         return Arrays.copyOfRange(log, LoggerSetting.LOG_XID_OFFSET, LoggerSetting.LOG_PAGE_NUMBER_OFFSET);
     }
 
-    static long getLogXID(byte[] log){
+    static long getLogXID(byte[] log) throws ErrorException {
         long logXid =  ByteParser.parseBytesToLong(getLogXIDBytes(log));
         if(logXid <= 0){
             Log.logErrorMessage(ErrorMessage.BAD_XID);
@@ -117,7 +119,7 @@ public interface Logger {
         return Arrays.copyOfRange(log, LoggerSetting.LOG_PAGE_NUMBER_OFFSET, LoggerSetting.LOG_OFFSET_OFFSET);
     }
 
-    static int getLogPageNumber(byte[] log){
+    static int getLogPageNumber(byte[] log) throws ErrorException {
         int logPageNumber = ByteParser.parseBytesToInt(getLogPageNumberBytes(log));
         if(logPageNumber <= 0){
             Log.logErrorMessage(ErrorMessage.BAD_PAGE_NUMBER);
@@ -129,7 +131,7 @@ public interface Logger {
         return Arrays.copyOfRange(log, LoggerSetting.LOG_OFFSET_OFFSET, LoggerSetting.LOG_DATA_OFFSET);
     }
 
-    static short getLogOffset(byte[] log){
+    static short getLogOffset(byte[] log) throws ErrorException {
         short logOffset = ByteParser.parseBytesToShort(getLogOffsetBytes(log));
         if(logOffset < 0){
             Log.logErrorMessage(ErrorMessage.BAD_OFFSET);
@@ -149,17 +151,16 @@ public interface Logger {
         return Bytes.concat(typeBytes, xidBytes, pageNumberBytes, offsetBytes, data);
     }
 
-    static LoggerSetting.InsertLog parseLogBytesToInsertLog(byte[] log){
+    static LoggerSetting.InsertLog parseLogBytesToInsertLog(byte[] log) throws ErrorException {
         LoggerSetting.InsertLog insertLog = new LoggerSetting.InsertLog();
         insertLog.type = LoggerSetting.LOG_TYPE_INSERT;
-        insertLog.xid = getLogXID(log);
         insertLog.pageNumber = getLogPageNumber(log);
         insertLog.offset = getLogOffset(log);
         insertLog.data = getLogData(log);
         return insertLog;
     }
 
-    static LoggerSetting.UpdateLog parseLogBytesToUpdateLog(byte[] log){
+    static LoggerSetting.UpdateLog parseLogBytesToUpdateLog(byte[] log) throws ErrorException {
         LoggerSetting.UpdateLog updateLog = new LoggerSetting.UpdateLog();
         updateLog.type = LoggerSetting.LOG_TYPE_UPDATE;
         updateLog.xid = getLogXID(log);

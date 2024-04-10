@@ -1,6 +1,8 @@
 package top.lxsky711.easydb.core.dm;
 
 import top.lxsky711.easydb.common.data.DataSetting;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 import top.lxsky711.easydb.core.common.AbstractCache;
@@ -31,7 +33,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
 
     private Page pageOne;
 
-    public DataManagerImpl(PageCache pageCache, Logger logger) {
+    public DataManagerImpl(PageCache pageCache, Logger logger) throws ErrorException {
         super(DataSetting.DATA_CACHE_DEFAULT_SIZE);
         this.pageCache = pageCache;
         this.logger = logger;
@@ -42,7 +44,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
      * @Author: 711lxsky
      * @Description: 创建并初始化第一页
      */
-    public void initPageOne(){
+    public void initPageOne() throws WarningException, ErrorException {
         int pageNumber = this.pageCache.buildNewPageWithData(PageOne.init());
         assert pageNumber == PageSetting.PAGE_ONE_DEFAULT_NUMBER;
         this.pageOne = this.pageCache.getPageByPageNumber(pageNumber);
@@ -53,7 +55,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
      * @Author: 711lxsky
      * @Description: 第一页数据刷盘
      */
-    public void flushPageOne(){
+    public void flushPageOne() throws WarningException, ErrorException {
         this.pageCache.flushPage(this.pageOne);
     }
 
@@ -70,7 +72,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
      * @Author: 711lxsky
      * @Description: 检查第一页VC
      */
-    public boolean loadAndCheckPageOne(){
+    public boolean loadAndCheckPageOne() throws WarningException, ErrorException {
         this.pageOne = this.pageCache.getPageByPageNumber(PageSetting.PAGE_ONE_DEFAULT_NUMBER);
         return PageOne.checkVCWithPage(this.pageOne);
     }
@@ -79,7 +81,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
      * @Author: 711lxsky
      * @Description: 初始化页面索引
      */
-    public void initPageIndex(){
+    public void initPageIndex() throws WarningException, ErrorException {
         int pagesNum= this.pageCache.getPagesNumber();
         for(int i = PageSetting.PAGE_X_DEFAULT_START_NUMBER; i <= pagesNum; i ++){
             Page page = this.pageCache.getPageByPageNumber(i);
@@ -89,7 +91,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
     }
 
     @Override
-    protected DataItem getCacheFromDataSourceByKey(long uid) {
+    protected DataItem getCacheFromDataSourceByKey(long uid) throws WarningException, ErrorException {
         int pageNumber = Logger.getPageNumberFromUid(uid);
         short offset = Logger.getOffsetFromUid(uid);
         Page page = this.pageCache.getPageByPageNumber(pageNumber);
@@ -97,12 +99,12 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
     }
 
     @Override
-    protected void releaseCacheForObject(DataItem dataItem) {
+    protected void releaseCacheForObject(DataItem dataItem) throws WarningException, ErrorException {
         dataItem.getPage().releaseOneReference();
     }
 
     @Override
-    public DataItem readDataItem(long uid) {
+    public DataItem readDataItem(long uid) throws WarningException, ErrorException {
         DataItem dataItem = super.getResource(uid);
         if(! dataItem.isValid()){
             dataItem.releaseOneReference();
@@ -112,7 +114,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
     }
 
     @Override
-    public long insertData(long xid, byte[] data) {
+    public long insertData(long xid, byte[] data) throws WarningException, ErrorException {
         // 先包裹成DataRecord格式
         byte[] newDataRecord = DataItem.buildDataRecord(data);
         int newDataRecordSize = newDataRecord.length;
@@ -162,17 +164,17 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
     }
 
     @Override
-    public void writeLog(byte[] log){
+    public void writeLog(byte[] log) throws WarningException, ErrorException {
         this.logger.writeLog(log);
     }
 
     @Override
-    public void releaseOneDataItem(long uid){
+    public void releaseOneDataItem(long uid) throws WarningException, ErrorException {
         super.releaseOneReference(uid);
     }
 
     @Override
-    public void close() {
+    public void close() throws ErrorException, WarningException {
         super.close();
         this.logger.close();
         // 注意PageOne关闭时设置VC

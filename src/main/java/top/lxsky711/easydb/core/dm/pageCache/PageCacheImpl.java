@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.dm.pageCache;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
@@ -39,8 +41,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
     // 放锁，防止多个线程同时操作文件造成数据不一致
     private Lock pageFileLock;
 
-    public PageCacheImpl(RandomAccessFile raf, int maxResourceNum)
-    {
+    public PageCacheImpl(RandomAccessFile raf, int maxResourceNum) throws WarningException, ErrorException {
         super(maxResourceNum);
         if(maxResourceNum < PageSetting.PAGE_CACHE_MIN_SIZE){
             Log.logWarningMessage(WarningMessage.PAGE_CACHE_RESOURCE_TOO_LESS);
@@ -59,7 +60,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
     }
 
     @Override
-    public int buildNewPageWithData(byte[] initData) {
+    public int buildNewPageWithData(byte[] initData) throws WarningException, ErrorException {
         // 文件中新增页面数据，页数自增
         int newPageNumber = this.pageNumbers.incrementAndGet();
         Page newPage = new PageImpl(newPageNumber, initData, null);
@@ -71,23 +72,23 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
     }
 
     @Override
-    public Page getPageByPageNumber(int pageNumber){
+    public Page getPageByPageNumber(int pageNumber) throws WarningException, ErrorException {
         return getResource(pageNumber);
     }
 
     @Override
-    public void releaseOneReference(Page page) {
+    public void releaseOneReference(Page page) throws WarningException, ErrorException {
         super.releaseOneReference(page.getPageNumber());
     }
 
     @Override
-    public void truncatePageWithMPageNum(int maxPageNumber) {
+    public void truncatePageWithMPageNum(int maxPageNumber) throws WarningException {
         long truncatedPageFileSize = getPageDataOffset(maxPageNumber + 1);
         FileManager.setFileNewLength(this.pageDataFile, truncatedPageFileSize);
     }
 
     @Override
-    public void flushPage(Page page) {
+    public void flushPage(Page page) throws WarningException, ErrorException {
         int pageNumber = page.getPageNumber();
         long pageDataOffset = getPageDataOffset(pageNumber);
         ByteBuffer data = ByteBuffer.wrap(page.getPageData());
@@ -102,12 +103,12 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
     }
 
     @Override
-    public void close() {
+    public void close() throws ErrorException {
         FileManager.closeFileAndChannel(this.pageFileChannel, this.pageDataFile);
     }
 
     @Override
-    protected Page getCacheFromDataSourceByKey(long cacheKey) {
+    protected Page getCacheFromDataSourceByKey(long cacheKey) throws ErrorException {
         int pageNumber = (int) cacheKey;
         long pageDataOffset = getPageDataOffset(pageNumber);
         ByteBuffer pageData = ByteBuffer.allocate(PageSetting.PAGE_SIZE);
@@ -122,7 +123,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
     }
 
     @Override
-    protected void releaseCacheForObject(Page page) {
+    protected void releaseCacheForObject(Page page) throws WarningException, ErrorException {
         if(page.isDirty()){
             flushPage(page);
             page.setDirtyStatus(false);

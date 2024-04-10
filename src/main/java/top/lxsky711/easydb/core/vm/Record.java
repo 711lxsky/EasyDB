@@ -2,6 +2,8 @@ package top.lxsky711.easydb.core.vm;
 
 import com.google.common.primitives.Bytes;
 import top.lxsky711.easydb.common.data.ByteParser;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.core.common.SubArray;
 import top.lxsky711.easydb.core.dm.DataItem;
 
@@ -109,7 +111,7 @@ public class Record {
      * @Author: 711lxsky
      * @Description: 设置记录XMAX
      */
-    public void setXMAX(long xid){
+    public void setXMAX(long xid) throws WarningException, ErrorException {
         this.dataItem.beforeModify();
         try {
             SubArray dataRecord = this.dataItem.getDataRecord();
@@ -125,7 +127,7 @@ public class Record {
      * @Author: 711lxsky
      * @Description: 释放记录引用，实际上就是释放一个DataItem引用
      */
-    public void releaseOneReference(){
+    public void releaseOneReference() throws WarningException, ErrorException {
         this.dataItem.releaseOneReference();
     }
 

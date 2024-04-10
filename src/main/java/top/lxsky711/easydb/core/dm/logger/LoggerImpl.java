@@ -2,6 +2,8 @@ package top.lxsky711.easydb.core.dm.logger;
 
 import com.google.common.primitives.Bytes;
 import top.lxsky711.easydb.common.data.ByteParser;
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
@@ -57,7 +59,7 @@ public class LoggerImpl implements Logger{
      * @Author: 711lxsky
      * @Description: 创建日志时初始化
      */
-    protected void initCreate(){
+    protected void initCreate() throws WarningException, ErrorException {
         ByteBuffer logsCheckSumBuffer = ByteBuffer.allocate(LoggerSetting.LOGGER_HEADER_LENGTH);
         FileManager.writeByteDataIntoFileChannel(this.logFileChannel, LoggerSetting.LOGGER_HEADER_OFFSET, logsCheckSumBuffer);
         FileManager.forceRefreshFileChannel(this.logFileChannel, false);
@@ -67,7 +69,7 @@ public class LoggerImpl implements Logger{
      * @Author: 711lxsky
      * @Description: 打开日志时初始化
      */
-    protected void initOpen(){
+    protected void initOpen() throws ErrorException, WarningException {
         long fileSize = FileManager.getRAFileLength(this.logFile);
         // 先检查是否有日志头
         if(fileSize < LoggerSetting.LOGGER_HEADER_LENGTH){
@@ -84,7 +86,7 @@ public class LoggerImpl implements Logger{
     }
 
     @Override
-    public void writeLog(byte[] data) {
+    public void writeLog(byte[] data) throws WarningException, ErrorException {
         byte[] log = this.wrapDataBytesToLog(data);
         ByteBuffer logBuffer = ByteBuffer.wrap(log);
         this.lock.lock();
@@ -103,7 +105,7 @@ public class LoggerImpl implements Logger{
     }
 
     @Override
-    public byte[] readNextLogData() {
+    public byte[] readNextLogData() throws ErrorException, WarningException {
         this.lock.lock();
         try {
             // 读取下一条完整日志
@@ -119,14 +121,14 @@ public class LoggerImpl implements Logger{
     }
 
     @Override
-    public void truncate(long length) {
+    public void truncate(long length) throws WarningException {
         this.lock.lock();
         FileManager.truncateFileChannel(this.logFileChannel, length);
         this.lock.unlock();
     }
 
     @Override
-    public void close() {
+    public void close() throws ErrorException {
         FileManager.closeFileAndChannel(this.logFileChannel, this.logFile);
     }
 
@@ -134,7 +136,7 @@ public class LoggerImpl implements Logger{
      * @Author: 711lxsky
      * @Description: 更新日志校验和
      */
-    private void updateLogsChecksum(byte[] log){
+    private void updateLogsChecksum(byte[] log) throws WarningException, ErrorException {
         this.logsChecksum = this.calculateChecksum(this.logsChecksum, log);
         byte[] logsChecksumBytes = ByteParser.intToBytes(this.logsChecksum);
         ByteBuffer logsChecksumBuffer = ByteBuffer.wrap(logsChecksumBytes);
@@ -146,7 +148,7 @@ public class LoggerImpl implements Logger{
      * @Author: 711lxsky
      * @Description: 检查日志并删除脏的尾部
      */
-    private void checkLogAndRemoveTail(){
+    private void checkLogAndRemoveTail() throws WarningException, ErrorException {
         this.rewind();
         int logsChecksum = 0;
         byte[] log;
@@ -177,7 +179,7 @@ public class LoggerImpl implements Logger{
      * @Author: 711lxsky
      * @Description: 内部读取下一条完整日志的封装
      */
-    private byte[] internalReadNextLog(){
+    private byte[] internalReadNextLog() throws ErrorException, WarningException {
         // 先看有没有下一条日志的大小记录
         if(this.logFileLocationPointer + LoggerSetting.LOGGER_LOG_DATA_OFFSET >= this.logFileOriginLength){
             return null;

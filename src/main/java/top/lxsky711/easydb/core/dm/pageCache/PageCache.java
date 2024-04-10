@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.dm.pageCache;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.file.FileManager;
 import top.lxsky711.easydb.common.log.ErrorMessage;
 import top.lxsky711.easydb.common.log.Log;
@@ -28,50 +30,50 @@ public interface PageCache {
      * @Description: 新建一个页面到数据库文件，并放入需要存放的数据，返回页号
      * 这里并没有自动放到缓存里
      */
-    int buildNewPageWithData(byte[] initData);
+    int buildNewPageWithData(byte[] initData) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 根据页号，从缓存中获取页面
      */
-    Page getPageByPageNumber(int pageNumber);
+    Page getPageByPageNumber(int pageNumber) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 释放一个页面资源引用
      */
-    void releaseOneReference(Page page);
+    void releaseOneReference(Page page) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 这个方法是用来恢复数据或者其他场景下，截断缓存文件
      */
-    void truncatePageWithMPageNum(int maxPageNumber);
+    void truncatePageWithMPageNum(int maxPageNumber) throws WarningException;
 
     /**
      * @Author: 711lxsky
      * @Description: 刷新页面缓存到文件中
      */
-    void flushPage(Page page);
+    void flushPage(Page page) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 关闭页面缓存，这里是基于RandomAccessFile实现，需要关闭资源
      */
-    void close();
+    void close() throws ErrorException;
 
-    static PageCacheImpl create(String pageFileFullName, long memory){
+    static PageCacheImpl create(String pageFileFullName, long memory) throws WarningException, ErrorException {
         File newFile = FileManager.createFile(pageFileFullName + PageSetting.PAGE_FILE_SUFFIX);
         return buildPageCacheWithFile(newFile, memory);
 
     }
 
-    static PageCacheImpl open(String pageFileFullName, long memory){
+    static PageCacheImpl open(String pageFileFullName, long memory) throws WarningException, ErrorException {
         File newFile = FileManager.openFile(pageFileFullName + PageSetting.PAGE_FILE_SUFFIX);
         return buildPageCacheWithFile(newFile, memory);
     }
 
-    static PageCacheImpl buildPageCacheWithFile(File file, long memory){
+    static PageCacheImpl buildPageCacheWithFile(File file, long memory) throws WarningException, ErrorException {
         if(Objects.nonNull(file)){
             RandomAccessFile pageFile = FileManager.buildRAFile(file);
             if(Objects.nonNull(pageFile)){

@@ -1,5 +1,6 @@
 package top.lxsky711.easydb.common.data;
 
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.common.log.Log;
 import top.lxsky711.easydb.common.log.WarningMessage;
 
@@ -16,7 +17,7 @@ public class DataParser {
      * @Author: 711lxsky
      * @Description: 根据数据类型将字符串转换为对应的数据
      */
-    public static Object parseStringToData(String str, String dataType){
+    public static Object parseStringToData(String str, String dataType) throws WarningException {
         if(StringUtil.stringIsBlank(str) || StringUtil.stringIsBlank(dataType)){
             Log.logWarningMessage(WarningMessage.STRING_IS_INVALID);
             return null;
@@ -44,7 +45,7 @@ public class DataParser {
         return result;
     }
 
-    public static long parseDataToLong(Object data, String dataType){
+    public static long parseDataToLong(Object data, String dataType) throws WarningException{
         switch (dataType){
             case DataSetting.DATA_INT32:
                 return (long)(int)data;
@@ -58,7 +59,7 @@ public class DataParser {
         }
     }
 
-    public static String parseDataToString(Object data, String dataType){
+    public static String parseDataToString(Object data, String dataType) throws WarningException{
         switch (dataType){
             case DataSetting.DATA_INT32:
                 return String.valueOf((int)data);
@@ -72,7 +73,7 @@ public class DataParser {
         }
     }
 
-    public static byte[] parseDataToBytes(Object data, String dataType){
+    public static byte[] parseDataToBytes(Object data, String dataType) throws WarningException{
         switch (dataType){
             case DataSetting.DATA_INT32:
                 return ByteParser.intToBytes((int)data);
@@ -86,7 +87,7 @@ public class DataParser {
         }
     }
 
-    public static <T> List<T> analyzeTwoListWithLogic(String logic, List<T> list1, List<T> list2){
+    public static <T> List<T> analyzeTwoListWithLogic(String logic, List<T> list1, List<T> list2) throws WarningException{
         switch (logic){
             case DataSetting.LOGIC_AND:
                 return CollectionUtil.getIntersectionForTwoList(list1, list2);
@@ -136,7 +137,7 @@ public class DataParser {
         }
     }
 
-    public static Object parseDataTypeToFormat(String dataType){
+    public static Object parseDataTypeToFormat(String dataType) throws WarningException{
         if(StringUtil.stringIsBlank(dataType)){
             Log.logWarningMessage(WarningMessage.STRING_IS_INVALID);
             return null;

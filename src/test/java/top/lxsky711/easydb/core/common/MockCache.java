@@ -1,8 +1,10 @@
 package top.lxsky711.easydb.core.common;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+
 public class MockCache extends AbstractCache<Long> {
 
-    public MockCache() {
+    public MockCache() throws ErrorException {
         super(50);
     }
 

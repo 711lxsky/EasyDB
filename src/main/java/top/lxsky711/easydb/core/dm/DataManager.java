@@ -1,5 +1,7 @@
 package top.lxsky711.easydb.core.dm;
 
+import top.lxsky711.easydb.common.exception.ErrorException;
+import top.lxsky711.easydb.common.exception.WarningException;
 import top.lxsky711.easydb.core.dm.logger.Logger;
 import top.lxsky711.easydb.core.dm.pageCache.PageCache;
 import top.lxsky711.easydb.core.tm.TransactionManager;
@@ -20,37 +22,37 @@ public interface DataManager {
      * @Author: 711lxsky
      * @Description: 以DataItem形式读取并返回数据
      */
-    DataItem readDataItem(long uid);
+    DataItem readDataItem(long uid) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 插入数据，先包裹成DataRecord格式，然后再借助页面索引插入到相应的页中，返回uid
      */
-    long insertData(long xid, byte[] data);
+    long insertData(long xid, byte[] data) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 调用Logger的writeLog方法，将日志写入到日志文件中
      */
-    void writeLog(byte[] log);
+    void writeLog(byte[] log) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 释放一个DataItem对象
      */
-    void releaseOneDataItem(long uid);
+    void releaseOneDataItem(long uid) throws WarningException, ErrorException;
 
     /**
      * @Author: 711lxsky
      * @Description: 关闭相应的资源
      */
-    void close();
+    void close() throws ErrorException, WarningException;
 
     /**
      * @Author: 711lxsky
      * @Description: 处于上层调用方法创建其他小模块
      */
-    static DataManager create(String dataFileFullName, long memory, TransactionManager tm){
+    static DataManager create(String dataFileFullName, long memory, TransactionManager tm) throws WarningException, ErrorException {
         PageCache pageCache = PageCache.create(dataFileFullName, memory);
         Logger logger = Logger.create(dataFileFullName);
         DataManagerImpl dm = new DataManagerImpl(pageCache, logger);
@@ -62,7 +64,7 @@ public interface DataManager {
      * @Author: 711lxsky
      * @Description: 处于上层调用方法打开其他小模块资源并作校验
      */
-    static DataManager open(String dataFileFullName, long memory, TransactionManager tm){
+    static DataManager open(String dataFileFullName, long memory, TransactionManager tm) throws WarningException, ErrorException {
         PageCache pageCache = PageCache.open(dataFileFullName, memory);
         Logger logger = Logger.open(dataFileFullName);
         DataManagerImpl dm = new DataManagerImpl(pageCache, logger);

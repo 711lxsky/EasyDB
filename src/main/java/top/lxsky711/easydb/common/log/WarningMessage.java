@@ -81,6 +81,9 @@ public class WarningMessage {
     public static final String DATA_TYPE_IS_INVALID
             = "The data type is invalid or not support!";
 
+    public static final String VERSION_CONTROL_DEAD_LOCK_OCCUR
+            = "The version control dead lock occurs!";
+
     public static final String NO_INDEX
             = "There is none index!";
 
