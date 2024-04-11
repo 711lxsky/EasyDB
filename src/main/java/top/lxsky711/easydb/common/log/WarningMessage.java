@@ -113,4 +113,13 @@ public class WarningMessage {
 
     public static final String TABLE_NOT_FOUND
             = "The table is not found!";
+
+    public static final String NESTED_TRANSACTION_NOT_SUPPORT
+            = "The nested transaction is not support, can't begin in a starting transaction!";
+
+    public static final String NONE_TRANSACTION
+            = "There is no transaction CurrentLY!";
+
+    public static final String SERVER_SOCKET_BUILD_ERROR
+            = "The server socket build error!";
 }

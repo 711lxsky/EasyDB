@@ -23,7 +23,7 @@ public class TMSetting {
     public static final byte TRANSACTION_ABORTED = 2;
 
     // 超级事务XID，永远为已提交状态
-    public static final long SUPER_TRANSACTION_XID = 0;
+    public static final long SUPER_TRANSACTION_XID = 0L;
 
     // XID文件后缀
     public static final String XID_FILE_SUFFIX = ".xid";

@@ -44,6 +44,8 @@ public interface TableManager {
      */
     byte[] insert(long xid, SPSetting.Insert insert) throws WarningException, ErrorException;
 
+    byte[] drop(long xid, SPSetting.Drop drop) throws WarningException;
+
     /**
      * @Author: 711lxsky
      * @Description: 查询数据

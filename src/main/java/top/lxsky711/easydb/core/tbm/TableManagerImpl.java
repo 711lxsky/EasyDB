@@ -111,6 +111,23 @@ public class TableManagerImpl implements TableManager{
         return table;
     }
 
+    public byte[] drop(long transactionXid, SPSetting.Drop drop) throws WarningException{
+        this.selfLock.lock();
+        try {
+            Table tableFromCache = this.getTableFromCache(drop.tableName);
+            if(Objects.isNull(tableFromCache)){
+                Log.logWarningMessage(WarningMessage.TABLE_NOT_FOUND);
+                return null;
+            }
+            this.tableCache.remove(tableFromCache.getTableName());
+            this.transactionTableCache.get(transactionXid).remove(tableFromCache);
+            return ByteParser.parseStringToNormalBytes(SPSetting.TOKEN_DROP_DEFAULT + " " + drop.tableName);
+        }
+        finally {
+            this.selfLock.unlock();
+        }
+    }
+
     @Override
     public byte[] insert(long transactionXid, SPSetting.Insert insert) throws WarningException, ErrorException {
         Table tableFromCache = this.getTableFromCache(insert.tableName);
