@@ -88,7 +88,7 @@ public interface TableManager {
      * @Author: 711lxsky
      * @Description: 以打开的形式拿到表管理器
      */
-    static TableManager load(String fullFileName, VersionManager vm, DataManager dm) throws WarningException, ErrorException {
+    static TableManager open(String fullFileName, VersionManager vm, DataManager dm) throws WarningException, ErrorException {
        Booter booter = Booter.openBooter(fullFileName);
        return new TableManagerImpl(vm, dm, booter);
     }

@@ -122,4 +122,7 @@ public class WarningMessage {
 
     public static final String SERVER_SOCKET_BUILD_ERROR
             = "The server socket build error!";
+
+    public static final String MEMORY_INVALID
+            = "The memory size is invalid!";
 }
