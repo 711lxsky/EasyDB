@@ -9,7 +9,7 @@ public class ServerSetting {
 
     public static final long EXECUTOR_TRANSACTION_XID_DEFAULT = -1L;
 
-    public static final int SERVER_SOCKET_PORT = 9875;
+    public static final int SERVER_SOCKET_PORT = 9876;
 
     public static final long MEMORY_SIZE_DEFAULT = (1 << 20) * 64;
 

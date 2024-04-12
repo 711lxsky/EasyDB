@@ -1,7 +1,6 @@
 package top.lxsky711.easydb.client;
 
 import top.lxsky711.easydb.common.exception.ErrorException;
-import top.lxsky711.easydb.transport.Encoder;
 import top.lxsky711.easydb.transport.Packager;
 import top.lxsky711.easydb.transport.Transporter;
 

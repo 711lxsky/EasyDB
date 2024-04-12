@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 /**
@@ -78,15 +79,25 @@ public class Booter {
         }
         // 再将临时文件移动到原文件路径，文件名会改变为.bt后缀
         try {
-            Files.move(booterTmpFile.toPath(), new File(this.booterFileFullName + TBMSetting.BOOTER_SUFFIX).toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
-        catch (IOException e){
+            Path sourcePath = booterTmpFile.toPath();
+            Path targetPath = new File(this.booterFileFullName + TBMSetting.BOOTER_SUFFIX).toPath();
+
+            // 移动文件并替换已存在的同名文件
+            Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+            // 移动成功后，更新文件引用
+            this.booterFile = targetPath.toFile();
+
+            // 检查新位置文件的权限（如果需要）
+            if (!this.booterFile.canRead() || !this.booterFile.canWrite()) {
+                Log.logWarningMessage(this.booterFile.getAbsolutePath() + WarningMessage.FILE_USE_ERROR);
+            }
+        } catch (IOException e) {
+            // 记录异常详细信息
             Log.logException(e);
+
+            // 根据实际情况考虑是否需要添加额外的错误处理逻辑，如重试、回滚、通知等
         }
-        // 将文件指向新路径
-        this.booterFile = new File(this.booterFileFullName + TBMSetting.BOOTER_SUFFIX);
-        if(! booterTmpFile.canRead() || ! booterTmpFile.canWrite()){
-            Log.logWarningMessage(WarningMessage.FILE_USE_ERROR);
-        }
+
     }
 }
