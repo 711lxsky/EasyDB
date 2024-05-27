@@ -20,21 +20,21 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class AbstractCache<T> {
 
     // 缓存数据
-    private HashMap<Long, T> cacheData;
+    private final HashMap<Long, T> cacheData;
 
     // 缓存中资源引用个数标记
-    private HashMap<Long, Integer> referenceRecord;
+    private final HashMap<Long, Integer> referenceRecord;
 
     // 资源获取情况记录
-    private HashMap<Long, Boolean> acquisitionSituation;
+    private final HashMap<Long, Boolean> acquisitionSituation;
 
     // 缓存最大资源数
-    private int maxResourceNum;
+    private final int maxResourceNum;
 
     // 现有缓存资源数量
     private int cacheCounter;
 
-    private Lock lock;
+    private final Lock lock;
 
     public AbstractCache(int maxResourceNum) throws ErrorException {
         if(maxResourceNum <= 0){

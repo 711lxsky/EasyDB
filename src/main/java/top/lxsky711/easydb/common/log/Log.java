@@ -9,6 +9,7 @@ import top.lxsky711.easydb.common.exception.WarningException;
 
 /**
  * @Author: 711lxsky
+ * @Description: 全局日志实现类
  */
 
 
@@ -23,7 +24,7 @@ public class Log {
     }
 
     public static void logException(Exception e) throws ErrorException{
-        logger.error(e + e.getMessage());
+        logger.error("{} {}", e, e.getMessage());
         System.exit(LogSetting.SYSTEM_EXIT_CODE);
         throw new ErrorException(e.getMessage(), e.getCause());
     }

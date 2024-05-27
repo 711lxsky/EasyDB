@@ -2,6 +2,7 @@ package top.lxsky711.easydb.common.log;
 
 /**
  * @Author: 711lxsky
+ * @Description: 全局日志配置
  */
 
 public class LogSetting {

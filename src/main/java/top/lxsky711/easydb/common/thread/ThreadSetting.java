@@ -2,7 +2,7 @@ package top.lxsky711.easydb.common.thread;
 
 /**
  * @Author: 711lxsky
- * @Description:
+ * @Description: 项目中用到的一些线程配置
  */
 
 public class ThreadSetting {

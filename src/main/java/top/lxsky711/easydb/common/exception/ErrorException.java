@@ -2,7 +2,7 @@ package top.lxsky711.easydb.common.exception;
 
 /**
  * @Author: 711lxsky
- * @Description:
+ * @Description: 错误异常封装
  */
 
 public class ErrorException extends Exception{

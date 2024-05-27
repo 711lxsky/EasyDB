@@ -2,6 +2,7 @@ package top.lxsky711.easydb.common.log;
 
 /**
  * @Author: 711lxsky
+ * @Description: 警告消息
  */
 
 public class WarningMessage {
