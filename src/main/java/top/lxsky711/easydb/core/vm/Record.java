@@ -22,10 +22,15 @@ import java.util.Objects;
 
 public class Record {
 
-    private long uid;
+    /**
+     * 同DataItem， 这个标识是 页号 + 偏移量
+     */
+    private final long uid;
 
-    // 一条记录存储在一个DataItem中
-    private DataItem dataItem;
+    /**
+     * 一条记录存储在一个DataItem中
+     */
+    private final DataItem dataItem;
 
     public Record(long uid, DataItem dataItem) {
         this.uid = uid;

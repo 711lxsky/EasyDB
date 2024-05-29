@@ -15,6 +15,7 @@ import java.util.Objects;
 /**
  * @Author: 711lxsky
  * @Description: 页面缓存接口，对接计数缓存框架，规范化操作
+ * 注意，页面数据的持久化也是由这个部分实现的
  */
 
 public interface PageCache {
@@ -46,7 +47,7 @@ public interface PageCache {
 
     /**
      * @Author: 711lxsky
-     * @Description: 这个方法是用来恢复数据或者其他场景下，截断缓存文件
+     * @Description: 这个方法是用来恢复数据或者其他场景下，截断页面文件
      */
     void truncatePageWithMPageNum(int maxPageNumber) throws WarningException;
 

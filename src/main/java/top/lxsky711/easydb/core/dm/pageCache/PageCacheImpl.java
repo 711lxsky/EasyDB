@@ -19,27 +19,31 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @Author: 711lxsky
- * @Description:
+ * @Description:  因为页面数据的数据源就是文件系统，所以数据的读写基于文件即可,包裹成Page
  */
 
 public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
 
-    /*
-     * 因为页面数据的数据源就是文件系统，所以数据的读写基于文件即可,包裹成Page
+    /**
+     * 页面数据文件
      */
+    private final RandomAccessFile pageDataFile;
 
-    // 页面数据文件
-    private RandomAccessFile pageDataFile;
+    /**
+     * 数据文件通道
+     */
+    private final FileChannel pageFileChannel;
 
-    // 数据文件通道
-    private FileChannel pageFileChannel;
+    /**
+     * 记录当前打开的页面数据文件所含页面的页数，
+     * 此数据在打开时就会被计算，并在创建页面时自增
+     */
+    private final AtomicInteger pageNumbers;
 
-    // 记录当前打开的页面数据文件所含页面的页数，
-    // 此数据在打开时就会被计算，并在创建页面时自增
-    private AtomicInteger pageNumbers;
-
-    // 放锁，防止多个线程同时操作文件造成数据不一致
-    private Lock pageFileLock;
+    /**
+     * 放锁，防止多个线程同时操作文件造成数据不一致
+     */
+    private final Lock pageFileLock;
 
     public PageCacheImpl(RandomAccessFile raf, int maxResourceNum) throws WarningException, ErrorException {
         super(maxResourceNum);
@@ -67,13 +71,11 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache{
         // 数据刷到文件中去
         this.flushPage(newPage);
         return newPageNumber;
-
-
     }
 
     @Override
     public Page getPageByPageNumber(int pageNumber) throws WarningException, ErrorException {
-        return getResource(pageNumber);
+        return super.getResource(pageNumber);
     }
 
     @Override

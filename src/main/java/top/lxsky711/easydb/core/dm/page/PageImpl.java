@@ -14,21 +14,31 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class PageImpl implements Page{
 
-    // 页面页号，从 1 开始
-    private int pageNumber;
+    /**
+     * 页面页号，从 1 开始
+     */
+    private final int pageNumber;
 
-    // 页面包含的字节数组形式数据
-    private byte[] data;
+    /**
+     * 页面包含的字节数组形式数据
+     */
+    private final byte[] data;
 
-    // 脏状态标记
-    // 脏的话意味着缓存中的数据和内存/持久层中的数据不一致，缓存驱逐时务必写回
+    /**
+     *  脏状态标记
+     * 脏的话意味着缓存中的数据和内存/持久层中的数据不一致，缓存驱逐时务必写回
+     */
     private boolean dirtyStatus;
 
-    // 页面缓存
-    private PageCache pageCache;
+    /**
+     * 页面缓存
+     */
+    private final PageCache pageCache;
 
-    // 页面锁，资源控制
-    private Lock lock;
+    /**
+     * 页面锁，资源控制
+     */
+    private final Lock lock;
 
     public PageImpl(int pageNumber, byte[] data, PageCache pc) {
         this.pageNumber = pageNumber;

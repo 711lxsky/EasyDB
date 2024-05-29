@@ -24,22 +24,34 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class LoggerImpl implements Logger{
 
-    // 日志文件
-    private RandomAccessFile logFile;
+    /**
+     * 日志文件
+     */
+    private final RandomAccessFile logFile;
 
-    // 日志文件通道
-    private FileChannel logFileChannel;
+    /**
+     * 日志文件通道
+     */
+    private final FileChannel logFileChannel;
 
-    // 资源锁
-    private Lock lock;
+    /**
+     * 资源锁
+     */
+    private final Lock lock;
 
-    // 日志文件位置指针
+    /**
+     * 日志文件位置指针
+     */
     private long logFileLocationPointer;
 
-    // 日志文件原始长度，读取日志的时候不去改动
+    /**
+     * 日志文件原始长度，读取日志的时候不去改动
+     */
     private long logFileOriginLength;
 
-    // 日志文件总校验和
+    /**
+     * 日志文件总校验和
+     */
     private int logsChecksum;
 
     LoggerImpl(RandomAccessFile raf){

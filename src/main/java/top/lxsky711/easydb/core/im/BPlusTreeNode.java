@@ -24,22 +24,30 @@ import java.util.Objects;
  *       NodeBody: [SonNode0Uid][Key0][SonNode1Uid]...[SonNodeNUid][KeyN]
  *                  SonNodeUid 子节点Uid(唯一标识)
  *                  Key 索引关键字
- *       注意： 在叶子节点中 uid 和 key 一一对应
- *             而在非叶子节点中， uid0 是没有配对值的， 因为默认其左侧是无限小， key0是和uid配对的， 是uid子节点中的最小数据
+ *       注意： 在叶子节点中 uid 和 key 一一对应，存储的就是底层数据
+ *             而在非叶子节点中， uid0 是没有配对值的， 因为默认其左侧是无限小， key0是和uid1配对的， 是uid1子节点中的最小数据，而keyN是MAX_VALUE无限大，以方便查找
  * 每个Node都存储在一条DataItem中
  */
 public class BPlusTreeNode {
 
-    // 存放一个B+树的引用，方便使用dm
+    /**
+     * 存放一个B+树的引用，方便使用dm
+     */
     private BPlusTree bPlusTree;
 
-    // 方便管理数据
+    /**
+     * 方便管理数据
+     */
     private DataItem dataItem;
 
-    // 节点数据
+    /**
+     * 节点数据
+     */
     private SubArray nodeData;
 
-    // 当前节点的唯一标识uid
+    /**
+     * 当前节点的唯一标识uid
+     */
     long nodeUid;
 
     /**

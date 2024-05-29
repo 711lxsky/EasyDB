@@ -24,15 +24,18 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class VersionManagerImpl extends AbstractCache<Record> implements VersionManager{
 
-    private TransactionManager tm;
+    private final TransactionManager tm;
 
-    private DataManager dm;
+    private final DataManager dm;
 
-    private Map<Long, Transaction> activeTransactions;
+    /**
+     * 档期那活跃的事务快照
+     */
+    private final Map<Long, Transaction> activeTransactions;
 
-    private VersionLockManager vlm;
+    private final VersionLockManager vlm;
 
-    private Lock selfLock;
+    private final Lock selfLock;
 
     public VersionManagerImpl(TransactionManager tm, DataManager dm) throws ErrorException {
         super(DataSetting.DATA_CACHE_DEFAULT_SIZE);

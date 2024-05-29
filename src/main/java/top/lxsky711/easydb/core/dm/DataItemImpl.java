@@ -20,20 +20,20 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DataItemImpl implements DataItem{
 
-    private long uid;
+    private final long uid;
 
     // 数据记录，注意这里rawDataRecord里面的rawData可能存储了非常多的冗余数据
-    private SubArray rawDataRecord;
+    private final SubArray rawDataRecord;
 
-    private byte[] oldDataRecord;
+    private final byte[] oldDataRecord;
 
-    private Page page;
+    private final Page page;
 
-    private DataManager dm;
+    private final DataManager dm;
 
-    private Lock readLock;
+    private final Lock readLock;
 
-    private Lock writeLock;
+    private final Lock writeLock;
 
     public DataItemImpl(SubArray dataRecord, byte[] oldData, Page page, long uid, DataManager dm){
         this.rawDataRecord = dataRecord;

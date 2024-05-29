@@ -95,6 +95,7 @@ public interface Logger {
         return null;
     }
 
+    // 这里的参数 log 实际上一条日志数据的纯数据部分，下面的也是
     static byte getLogType(byte[] log) throws ErrorException {
         byte logType =  log[LoggerSetting.LOG_TYPE_OFFSET];
         if(logType != LoggerSetting.LOG_TYPE_INSERT && logType != LoggerSetting.LOG_TYPE_UPDATE){

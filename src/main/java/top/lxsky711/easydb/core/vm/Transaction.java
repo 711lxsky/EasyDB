@@ -12,16 +12,24 @@ import java.util.Set;
 
 public class Transaction {
 
-    // 抽象事务的XID
+    /**
+     * 抽象事务的XID
+     */
     private long xid;
 
-    // 事务隔离级别
-    private int transactionIsolationLevel;
+    /**
+     * 事务隔离级别
+     */
+    private final int transactionIsolationLevel;
 
-    // 当前事务执行(开始)时的活跃事务XID快照集合
+    /**
+     * 当前事务执行(开始)时的活跃事务XID快照集合
+     */
     private Set<Long> snapshotXIDsForActiveTransaction;
 
-    // 意外终止标志，后续出现问题，这个成员变量会被设置为true，表示事务选择中止
+    /**
+     * 意外终止标志，后续出现问题，这个成员变量会被设置为true，表示事务选择中止
+     */
     private boolean accidentalTermination;
 
     public Transaction(long xid, int transactionIsolationLevel) {

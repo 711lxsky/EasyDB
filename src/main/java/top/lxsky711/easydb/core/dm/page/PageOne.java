@@ -39,7 +39,7 @@ public class PageOne {
 
     /**
      * @Author: 711lxsky
-     * @Description: 开页面时设置校验码的操作封装
+     * @Description: 打开页面时设置校验码的操作封装
      */
     private static void setVCWithPageDataOpen(byte[] pageData){
         byte[] validCheck = RandomUtil.randomBytes(PageSetting.PAGE_ONE_VALID_CHECK_LENGTH);

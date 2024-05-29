@@ -23,10 +23,10 @@ import java.util.concurrent.locks.ReentrantLock;
 public class PageIndex {
 
     // 资源锁
-    private Lock lock;
+    private final Lock lock;
 
     // 页面信息列表
-    private List<PageInfo> [] pageInfoLists;
+    private final List<PageInfo> [] pageInfoLists;
 
     /**
      * @Author: 711lxsky

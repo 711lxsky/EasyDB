@@ -25,11 +25,11 @@ import java.util.Objects;
 
 public class DataManagerImpl extends AbstractCache<DataItem> implements DataManager{
 
-    private PageCache pageCache;
+    private final PageCache pageCache;
 
-    private Logger logger;
+    private final Logger logger;
 
-    private PageIndex pageIndex;
+    private final PageIndex pageIndex;
 
     private Page pageOne;
 

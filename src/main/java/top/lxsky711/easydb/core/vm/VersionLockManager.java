@@ -21,24 +21,35 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class VersionLockManager {
 
-    // 某个XID事务已经控制的Record记录列表， 一个XID事务可以控制多个Record记录
-    private Map<Long, List<Long>> transactionControlledRecords;
+    /**
+     * 某个XID事务已经控制的Record记录列表， 一个XID事务可以控制多个Record记录
+     */
+    private final Map<Long, List<Long>> transactionControlledRecords;
 
-    // 某个Record记录被哪个XID事务持有，一个Record记录只能被一个XID事务持有
-    private Map<Long, Long> recordControlledByTransaction;
+    /**
+     * 某个Record记录被哪个XID事务持有，一个Record记录只能被一个XID事务持有
+     */
+    private final Map<Long, Long> recordControlledByTransaction;
 
-    // 等待获取某个Record记录的XID事务列表，一个Record记录可以被多个XID事务等待
-    private Map<Long, List<Long>> recordWaitByTransactions;
+    /**
+     * 等待获取某个Record记录的XID事务列表，一个Record记录可以被多个XID事务等待
+     */
+    private final Map<Long, List<Long>> recordWaitByTransactions;
 
+    /**
+     * 某个XID事务，在等待获取目标Record记录， 一个XID事务只能等待一个Record记录
+     */
+    private final Map<Long, Long> transactionWaitForRecord;
 
-    // 某个XID事务，在等待获取目标Record记录， 一个XID事务只能等待一个Record记录
-    private Map<Long, Long> transactionWaitForRecord;
+    /**
+     * 正在等待资源的XID事务，携带锁
+     */
+    private final Map<Long, Lock> transactionWaitWithLock;
 
-    // 正在等待资源的XID事务，携带锁
-    private Map<Long, Lock> transactionWaitWithLock;
-
-    // 内部进程资源锁
-    private Lock selfLock;
+    /**
+     * 内部进程资源锁
+     */
+    private final Lock selfLock;
 
     public VersionLockManager() {
         this.transactionControlledRecords = new HashMap<>();
@@ -129,7 +140,7 @@ public class VersionLockManager {
         if(Objects.nonNull(searchXidStamp) && searchXidStamp == this.stampMark){
             return true;
         }
-        // 已经被检查，且不再当前检查路径中
+        // 已经被检查，且不在当前检查路径中
         if(Objects.nonNull(searchXidStamp) && searchXidStamp < this.stampMark){
             return false;
         }
@@ -191,9 +202,9 @@ public class VersionLockManager {
                 if(this.transactionWaitWithLock.containsKey(waitingTransactionXid)){
                     this.recordControlledByTransaction.put(uid, waitingTransactionXid);
                     // 释放等待锁
-                    Lock waitingLock = this.transactionWaitWithLock.remove(waitingTransactionXid);
+                    Lock waitingLock = this.transactionWaitWithLock.get(waitingTransactionXid);
                     waitingLock.unlock();
-                    transactionWaitWithLock.remove(waitingTransactionXid);
+                    this.transactionWaitWithLock.remove(waitingTransactionXid);
                     break;
                 }
             }

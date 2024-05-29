@@ -30,7 +30,7 @@ public class VMSetting {
 
     public static final int TRANSACTION_ISOLATION_LEVEL_DEFAULT = TRANSACTION_ISOLATION_LEVEL_READ_COMMITTED;
 
-    public static final int VERSION_LOCK_DEADLOCK_DETECT_RING_STAMP_DEFAULT = 0;
+    public static final int VERSION_LOCK_DEADLOCK_DETECT_RING_STAMP_DEFAULT = 1;
 
     public static final int TRANSACTION_XID_ERROR_DEFAULT = -1;
 }

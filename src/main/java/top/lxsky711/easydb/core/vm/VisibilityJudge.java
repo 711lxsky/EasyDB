@@ -39,7 +39,7 @@ public class VisibilityJudge {
         }
         switch (transaction.getTransactionIsolationLevel()){
             case VMSetting.TRANSACTION_ISOLATION_LEVEL_READ_COMMITTED:
-                return judgeForReadCommitted(tm, transactionXid, recordXmin, recordXmax);
+                return judgeForReadCommitted(tm, recordXmin, recordXmax);
             case VMSetting.TRANSACTION_ISOLATION_LEVEL_REPEATABLE_READ:
                 return judgeForRepeatableRead(tm, transaction, recordXmin, recordXmax);
             default:
@@ -50,9 +50,9 @@ public class VisibilityJudge {
 
     /**
      * @Author: 711lxsky
-     * @Description: 读提交级别判断
+     * @Description: 读已提交级别判断
      */
-    private static boolean judgeForReadCommitted(TransactionManager tm, long transactionXid, long recordXmin, long recordXmax) throws ErrorException {
+    private static boolean judgeForReadCommitted(TransactionManager tm, long recordXmin, long recordXmax) throws ErrorException {
         // 如果记录由某个已经提交的事务创建
         if(tm.isCommitted(recordXmax)){
             // 如果还未被删除，则可见
@@ -82,7 +82,7 @@ public class VisibilityJudge {
                 return true;
             }
             // 被删除，则判断删除事务是否已经提交，或者在当前事务执行之后执行/提交
-            if(recordXmax != recordXmin){
+            if(recordXmax != transactionXid){
                 return ! tm.isCommitted(recordXmax) || recordXmax > transactionXid || transaction.isInSnapshot(recordXmax);
             }
         }
