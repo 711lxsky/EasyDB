@@ -22,9 +22,9 @@ import java.util.concurrent.TimeUnit;
 public class Server {
 
     // 监听/运行端口
-    private int operatingPort;
+    private final int operatingPort;
 
-    private TableManager tbm;
+    private final TableManager tbm;
 
     public Server(int operatingPort, TableManager tbm) {
         this.operatingPort = operatingPort;

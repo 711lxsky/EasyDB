@@ -23,7 +23,7 @@ import java.util.*;
 
 public class Table {
 
-    private TableManager tbm;
+    private final TableManager tbm;
 
     // 表唯一标识uid
     private long uid;
@@ -34,7 +34,7 @@ public class Table {
     // 下一个表的uid
     private long nextTableUid;
 
-    private List<Field> fields;
+    private final List<Field> fields;
 
     private Table(TableManager tbm, String tableName, long nextTableUid) {
         this.tbm = tbm;

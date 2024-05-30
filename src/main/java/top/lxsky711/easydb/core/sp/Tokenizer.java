@@ -14,16 +14,24 @@ import java.util.Objects;
 
 public class Tokenizer {
 
-    // 语句
-    private byte[] statement;
+    /**
+     * 语句
+     */
+    private final byte[] statement;
 
-    // 当前在语句中的分析定位
+    /**
+     * 当前在语句中的分析定位
+     */
     private int curAnalysisPos;
 
-     // 当前解析出的token
+    /**
+     * 当前解析出的token
+     */
     private String curToken;
 
-    // 是否需要刷新token,即将下一个token解析出来
+    /**
+     * 是否需要刷新token,即将下一个token解析出来
+     */
     private boolean needFlushToken;
 
     public Tokenizer(byte[] statement) {

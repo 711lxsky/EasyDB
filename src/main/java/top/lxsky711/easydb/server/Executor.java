@@ -22,7 +22,7 @@ public class Executor {
     private long transactionXid;
 
     // 表管理器
-    private TableManager tbm;
+    private final TableManager tbm;
 
     public Executor(TableManager tbm){
         this.tbm = tbm;

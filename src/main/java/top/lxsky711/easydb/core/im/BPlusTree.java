@@ -21,24 +21,23 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Author: 711lxsky
  * @Description: B+树实现类
  * 索引的数据直接被插入数据库文件中，不需要经过版本管理
+ *
+ * // TODO 全表扫描、节点查找二分
  */
 
 public class BPlusTree {
 
     /**
-     * @Author: 711lxsky
      * @Description: 数据管理
      */
     private DataManager dm;
 
     /**
-     * @Author: 711lxsky
      * @Description: 用以对 rootUid 数据进行处理
      */
     private DataItem rootUidDataItem;
 
     /**
-     * @Author: 711lxsky
      * @Description: 自身资源锁
      */
     private Lock selfLock;
@@ -206,7 +205,6 @@ public class BPlusTree {
             // 当前节点也发生了分裂，需要更新根节点
             this.updateRootUid(curRootUid, result.nodeNewSonUid, result.nodeNewKey);
         }
-
     }
 
     /**

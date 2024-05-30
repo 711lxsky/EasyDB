@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 public class Shell {
 
-    private Client client;
+    private final Client client;
 
     public Shell(Client client) {
         this.client = client;

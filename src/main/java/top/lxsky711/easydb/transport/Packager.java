@@ -5,12 +5,12 @@ import top.lxsky711.easydb.common.exception.WarningException;
 
 /**
  * @Author: 711lxsky
- * @Description: 数据包装类
+ * @Description: 数据包装、管理类
  */
 
 public class Packager {
 
-    private Transporter transporter;
+    private final Transporter transporter;
 
     public Packager(Transporter transporter) {
         this.transporter = transporter;

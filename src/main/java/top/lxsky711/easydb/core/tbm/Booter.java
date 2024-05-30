@@ -23,7 +23,7 @@ import java.nio.file.StandardCopyOption;
 public class Booter {
 
     // 记录文件的全名，不包含后缀
-    private String booterFileFullName;
+    private final String booterFileFullName;
 
     // 记录文件
     private File booterFile;

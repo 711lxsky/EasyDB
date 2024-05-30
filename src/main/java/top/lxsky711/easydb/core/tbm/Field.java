@@ -32,7 +32,7 @@ public class Field {
     private long uid;
 
     // 字段所属表
-    private Table tableAttributed;
+    private final Table tableAttributed;
 
     // 字段名称
     String fieldName;

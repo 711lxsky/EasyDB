@@ -20,9 +20,9 @@ import java.util.Arrays;
 
 public class SocketHandler implements Runnable{
 
-    private Socket socket;
+    private final Socket socket;
 
-    private TableManager tbm;
+    private final TableManager tbm;
 
     public SocketHandler(Socket socket, TableManager tbm) {
         this.socket = socket;

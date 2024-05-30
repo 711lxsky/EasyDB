@@ -17,22 +17,22 @@ import java.util.stream.Stream;
 
 /**
  * @Author: 711lxsky
- * @Description:
+ * @Description: 表、字段管理器实现类
  */
 
 public class TableManagerImpl implements TableManager{
 
-    private VersionManager vm;
+    private final VersionManager vm;
 
-    private DataManager dm;
+    private final DataManager dm;
 
-    private Booter booter;
+    private final Booter booter;
 
-    private Map<String, Table> tableCache;
+    private final Map<String, Table> tableCache;
 
-    private Map<Long, List<Table>> transactionTableCache;
+    private final Map<Long, List<Table>> transactionTableCache;
 
-    private Lock selfLock;
+    private final Lock selfLock;
 
     public TableManagerImpl(VersionManager vm, DataManager dm, Booter booter) throws WarningException, ErrorException {
         this.vm = vm;

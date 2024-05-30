@@ -15,7 +15,7 @@ import java.net.Socket;
 
 public class Transporter {
 
-    private Socket socket;
+    private final Socket socket;
 
     private BufferedReader reader;
 

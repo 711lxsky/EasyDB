@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public class Client {
 
-    private Packager packager;
+    private final Packager packager;
 
     public Client(Packager packager){
         this.packager = packager;
