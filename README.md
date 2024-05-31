@@ -1,5 +1,7 @@
 # EasyDB
 
+更了一篇博文：[EasyDB项目回顾](https://711lxsky.github.io/2024/05/31/blog21/)
+
 一个`Java`实现的数据库，部分原理参照自`MySQL`、`PostgreSQL`和`SQLite`，实现了以下比较重要功能：
 
 - 可靠性数据检测和数据丢失恢复策略
