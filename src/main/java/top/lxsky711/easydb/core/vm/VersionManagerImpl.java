@@ -29,7 +29,7 @@ public class VersionManagerImpl extends AbstractCache<Record> implements Version
     private final DataManager dm;
 
     /**
-     * 档期那活跃的事务快照
+     * 当前活跃的事务快照
      */
     private final Map<Long, Transaction> activeTransactions;
 

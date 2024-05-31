@@ -84,8 +84,8 @@ public class VersionLockManager {
             CollectionUtil.putElementIntoListMap(this.recordWaitByTransactions, uid, xid);
             if(detectDeadlock()){
                 // 这里先注释掉，因为死锁检测到之后，会尝试撤销某个事务，所以就先不删掉记录
-//                this.transactionWaitForRecord.remove(xid);
-//                CollectionUtil.removeElementFromListMap(this.recordWaitByTransactions, uid, xid);
+                this.transactionWaitForRecord.remove(xid);
+                CollectionUtil.removeElementFromListMap(this.recordWaitByTransactions, uid, xid);
                 Log.logWarningMessage(WarningMessage.VERSION_CONTROL_DEAD_LOCK_OCCUR);
             }
             // 放入等待队列

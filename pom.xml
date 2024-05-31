@@ -37,11 +37,11 @@
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 <!--        一个开源的 Java 库，用于将 Java 对象与其 JSON 表示形式相互转换-->
 <!--        对象序列化，对象反序列化，泛型支持，自定义序列化和反序列化，处理复杂对象，无需额外映射，配置选项-->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.google.code.gson</groupId>-->
+<!--            <artifactId>gson</artifactId>-->
+<!--            <version>2.10.1</version>-->
+<!--        </dependency>-->
 
 
         <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
